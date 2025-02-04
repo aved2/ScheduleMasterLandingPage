@@ -1,6 +1,12 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Calendar, Settings } from "lucide-react";
+import { Calendar, Settings, CalendarPlus, UserCog } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Navbar() {
   return (
@@ -25,12 +31,27 @@ export default function Navbar() {
                 Go to App
               </Button>
             </Link>
-            <Link href="/preferences">
-              <Button variant="ghost" className="gap-2">
-                <Settings className="h-4 w-4" />
-                Preferences
-              </Button>
-            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <Link href="/preferences">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <UserCog className="mr-2 h-4 w-4" />
+                    <span>Edit Preferences</span>
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/calendars">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <CalendarPlus className="mr-2 h-4 w-4" />
+                    <span>Manage Calendars</span>
+                  </DropdownMenuItem>
+                </Link>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
