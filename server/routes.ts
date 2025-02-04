@@ -83,3 +83,34 @@ export function registerRoutes(app: Express): Server {
 
   return httpServer;
 }
+import { OAuth2Client } from 'google-auth-library';
+import { google } from 'googleapis';
+
+// Calendar integration endpoints
+app.post('/api/calendars/google/connect', async (req, res) => {
+  const { code } = req.body;
+  const oauth2Client = new OAuth2Client(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_REDIRECT_URI
+  );
+  
+  try {
+    const { tokens } = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
+    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+    // Store tokens in user record
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to connect calendar' });
+  }
+});
+
+app.get('/api/events/sync', async (req, res) => {
+  try {
+    // Sync logic for connected calendars
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to sync events' });
+  }
+});

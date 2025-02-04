@@ -22,6 +22,20 @@ export const events = pgTable("events", {
   startTime: timestamp("start_time").notNull(),
   endTime: timestamp("end_time").notNull(),
   location: text("location"),
+  category: text("category").notNull().default('personal'),
+  source: text("source"), // google, outlook, apple, manual
+  externalId: text("external_id"),
+  rating: integer("rating"),
+  price: integer("price"),
+});
+
+export const userCalendars = pgTable("user_calendars", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  provider: text("provider").notNull(), // google, outlook, apple
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token"),
+  expiresAt: timestamp("expires_at"),
 });
 
 export const activitySuggestions = pgTable("activity_suggestions", {
