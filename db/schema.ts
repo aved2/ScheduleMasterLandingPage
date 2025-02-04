@@ -8,9 +8,9 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   location: text("location"),
   preferences: jsonb("preferences").$type<{
+    dietaryRestrictions: string[];
+    interests: string[];
     activityTypes: string[];
-    maxTravelDistance: number;
-    minimumFreeTime: number;
   }>(),
 });
 
