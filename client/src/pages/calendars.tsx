@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Calendar, AlertCircle } from "lucide-react";
 import { useState } from "react";
-import { SiGoogle, SiMicrosoftoutlook, SiApple } from "react-icons/si";
+import { SiGoogle, SiApple } from "react-icons/si";
+import { BiLogoMicrosoft } from "react-icons/bi";
 
 export default function Calendars() {
   const [isGoogleDialogOpen, setIsGoogleDialogOpen] = useState(false);
@@ -80,7 +81,7 @@ export default function Calendars() {
             <Dialog open={isOutlookDialogOpen} onOpenChange={setIsOutlookDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="justify-start w-full">
-                  <SiMicrosoftoutlook className="mr-2 h-4 w-4" />
+                  <BiLogoMicrosoft className="mr-2 h-4 w-4" />
                   Connect Outlook Calendar
                 </Button>
               </DialogTrigger>
