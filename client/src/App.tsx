@@ -1,4 +1,3 @@
-
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Route, Switch } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
@@ -9,6 +8,7 @@ import Landing from "@/pages/landing";
 import Preferences from "@/pages/preferences";
 import NotFound from "@/pages/not-found";
 import Features from "@/pages/features";
+import Calendars from "@/pages/calendars"; // Added import for Calendars
 
 export default function App() {
   return (
@@ -19,6 +19,7 @@ export default function App() {
         <Route path="/features" component={Features} />
         <Route path="/app" component={Home} />
         <Route path="/preferences" component={Preferences} />
+        <Route path="/calendars" component={Calendars} /> {/* Added route for Calendars */}
         <Route component={NotFound} />
       </Switch>
       <Toaster />
