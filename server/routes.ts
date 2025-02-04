@@ -3,6 +3,13 @@ import { createServer, type Server } from "http";
 import { db } from "@db";
 import { events, users, activitySuggestions } from "@db/schema";
 import { eq } from "drizzle-orm";
+import { OAuth2Client } from 'google-auth-library';
+
+const CLIENT_ID = '505387694243-rqk2uo1mfta52pdskhOg8llieg6rkNhb.apps.googleusercontent.com';
+const CLIENT_SECRET = 'GOCSPX-wY-6eXzPu3Pf6uW5nSWr4LZWSFY';
+const REDIRECT_URI = 'https://workspace.arkhthareddy.repl.co/oauth2callback';
+
+const oauth2Client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
 
 export function registerRoutes(app: Express): Server {
   const httpServer = createServer(app);
@@ -78,6 +85,36 @@ export function registerRoutes(app: Express): Server {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to decline suggestion" });
+    }
+  });
+
+  // Google OAuth endpoints
+  app.get('/auth/google', (req, res) => {
+    const authUrl = oauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      scope: [
+        'https://www.googleapis.com/auth/calendar.readonly',
+        'https://www.googleapis.com/auth/userinfo.profile',
+        'https://www.googleapis.com/auth/userinfo.email'
+      ]
+    });
+    res.redirect(authUrl);
+  });
+
+  app.get('/oauth2callback', async (req, res) => {
+    try {
+      const { code } = req.query;
+      const { tokens } = await oauth2Client.getToken(code as string);
+      oauth2Client.setCredentials(tokens);
+      
+      // Here you would typically:
+      // 1. Store the tokens in your database
+      // 2. Create/update user session
+      // 3. Redirect to the main app
+      
+      res.redirect('/home');
+    } catch (error) {
+      res.status(500).json({ error: 'Authentication failed' });
     }
   });
 
