@@ -51,6 +51,20 @@ export const activitySuggestions = pgTable("activity_suggestions", {
   indoorActivity: boolean("indoor_activity").default(true),
   accepted: boolean("accepted").default(false),
   rating: integer("rating"), // User feedback 1-5
+  isPublic: boolean("is_public").default(false), // New field for sharing
+  shareCode: text("share_code"), // New field for unique sharing link
+  sharedBy: text("shared_by"), // New field to track who shared it
+  sharedAt: timestamp("shared_at"), // New field to track when it was shared
+  shareCount: integer("share_count").default(0), // New field to track number of shares
+});
+
+export const sharedActivities = pgTable("shared_activities", {
+  id: serial("id").primaryKey(),
+  activityId: integer("activity_id").references(() => activitySuggestions.id),
+  sharedByUserId: integer("shared_by_user_id").references(() => users.id),
+  sharedWithUserId: integer("shared_with_user_id").references(() => users.id),
+  sharedAt: timestamp("shared_at").notNull(),
+  status: text("status").notNull(), // pending, accepted, declined
 });
 
 export const userRelations = relations(users, ({ many }) => ({

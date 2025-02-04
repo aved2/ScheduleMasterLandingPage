@@ -1,11 +1,17 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { ActivitySuggestion } from "@db/schema";
-import { Clock, MapPin, Sun, Battery, Star } from "lucide-react";
+import { Clock, MapPin, Sun, Battery, Star, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "@/hooks/use-toast";
 
 interface ActivityCardProps {
   suggestion: ActivitySuggestion;
@@ -25,14 +31,49 @@ export default function ActivityCard({ suggestion, className }: ActivityCardProp
     },
   });
 
+  const shareMutation = useMutation({
+    mutationFn: async (isPublic: boolean) => {
+      const response = await apiRequest("POST", `/api/activities/${suggestion.id}/share`, { isPublic });
+      return response;
+    },
+    onSuccess: (data) => {
+      navigator.clipboard.writeText(data.shareUrl);
+      toast({
+        title: "Share link copied!",
+        description: "The link has been copied to your clipboard.",
+      });
+    },
+  });
+
   return (
     <Card className={cn("relative", className)}>
       <CardContent className="pt-4">
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-lg font-semibold">{suggestion.title}</h3>
-          <div className="flex items-center gap-1">
-            <Battery className="w-4 h-4" />
-            <span>Energy: {suggestion.energyLevel}/5</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
+              <Battery className="w-4 h-4" />
+              <span>Energy: {suggestion.energyLevel}/5</span>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Share2 className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onClick={() => shareMutation.mutate(true)}
+                >
+                  Share Publicly
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => shareMutation.mutate(false)}
+                >
+                  Share Privately
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
         <p className="text-sm text-muted-foreground mb-4">{suggestion.description}</p>
