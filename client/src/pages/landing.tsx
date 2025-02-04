@@ -48,10 +48,10 @@ export default function Landing() {
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Intelligent Calendar Management
+            GoLucky: Your AI Calendar Assistant
           </h1>
           <p className="text-xl text-muted-foreground mb-8">
-            Let AI help you plan your perfect day
+            World's First AI-Powered Recommendation System Built Around Your Personal and Work Calendars
           </p>
           <div className="flex gap-4 justify-center">
             <Button size="lg" className="gap-2">

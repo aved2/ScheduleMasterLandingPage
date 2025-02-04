@@ -16,7 +16,7 @@ export default function Navbar() {
           <Link href="/">
             <a className="flex items-center gap-2 font-semibold text-lg">
               <Calendar className="h-6 w-6" />
-              Smart Calendar
+              GoLucky
             </a>
           </Link>
 
