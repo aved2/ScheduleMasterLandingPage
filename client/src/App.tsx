@@ -15,6 +15,7 @@ export default function App() {
       <Navbar />
       <Switch>
         <Route path="/" component={Landing} />
+        <Route path="/features" component={Features} />
         <Route path="/app" component={Home} />
         <Route path="/preferences" component={Preferences} />
         <Route component={NotFound} />

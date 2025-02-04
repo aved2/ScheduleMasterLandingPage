@@ -15,6 +15,11 @@ export default function Navbar() {
           </Link>
 
           <div className="flex items-center gap-4">
+            <Link href="/features">
+              <Button variant="ghost" className="gap-2">
+                Features
+              </Button>
+            </Link>
             <Link href="/app">
               <Button variant="default" className="gap-2">
                 Go to App

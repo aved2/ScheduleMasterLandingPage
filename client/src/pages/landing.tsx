@@ -13,12 +13,20 @@ export default function Landing() {
 
   const testimonials = [
     {
-      text: "This app has revolutionized how I manage my time. The AI suggestions are spot-on!",
+      text: "The app suggested a museum visit between my meetings - it was the perfect creative break I needed!",
       author: "Sarah J., Product Manager"
     },
     {
-      text: "The calendar integration is seamless. It's exactly what I needed for my busy schedule.",
+      text: "I love how it finds nearby parks for my running sessions based on my schedule gaps.",
       author: "Mike R., Entrepreneur"
+    },
+    {
+      text: "It helped me discover local cafes for my work breaks. The location-aware suggestions are incredible!",
+      author: "Emma L., Designer"
+    },
+    {
+      text: "The AI perfectly balances my work meetings with leisure activities. It's like having a personal assistant.",
+      author: "David K., Software Engineer"
     },
   ];
 
