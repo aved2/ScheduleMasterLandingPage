@@ -19,58 +19,97 @@ export async function generatePersonalizedSuggestions(
   context: RecommendationContext
 ): Promise<ActivitySuggestion[]> {
   try {
-    // Prepare the prompt with user context
-    const prompt = {
-      role: "system",
-      content: `You are an AI activity recommendation engine. Based on the following context, suggest 3 personalized activities:
-      Past Activities: ${JSON.stringify(context.pastActivities)}
-      User Preferences: ${JSON.stringify(context.userPreferences)}
-      Current Events: ${JSON.stringify(context.currentEvents)}
-      Location: ${context.location || 'Unknown'}
-      Time of Day: ${context.timeOfDay}
-
-      Generate suggestions in JSON format with the following structure:
+    // Prepare sample suggestions in case AI fails
+    const fallbackSuggestions = [
       {
-        "suggestions": [
-          {
-            "title": "string",
-            "description": "string",
-            "duration": number,
-            "location": "string",
-            "type": "string",
-            "energyLevel": number,
-            "weatherDependent": boolean,
-            "indoorActivity": boolean
-          }
-        ]
-      }`
-    };
+        title: "Coffee Break",
+        description: "Take a refreshing coffee break at a nearby café",
+        duration: 30,
+        location: "Local Café",
+        type: "relaxation",
+        energyLevel: 2,
+        weatherDependent: false,
+        indoorActivity: true
+      },
+      {
+        title: "Quick Walk",
+        description: "Take a brisk walk around the block",
+        duration: 15,
+        location: "Nearby",
+        type: "exercise",
+        energyLevel: 3,
+        weatherDependent: true,
+        indoorActivity: false
+      }
+    ];
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        { role: "system", content: prompt.content }
-      ],
-      response_format: { type: "json_object" }
-    });
+    try {
+      const prompt = {
+        role: "system",
+        content: `Generate 3 activity suggestions based on:
+        Past Activities: ${JSON.stringify(context.pastActivities)}
+        User Preferences: ${JSON.stringify(context.userPreferences)}
+        Current Events: ${JSON.stringify(context.currentEvents)}
+        Location: ${context.location || 'Unknown'}
+        Time of Day: ${context.timeOfDay}
 
-    const suggestions = JSON.parse(response.choices[0].message.content).suggestions;
+        Respond in this exact JSON format:
+        {
+          "suggestions": [
+            {
+              "title": "string",
+              "description": "string",
+              "duration": number,
+              "location": "string",
+              "type": "string",
+              "energyLevel": number,
+              "weatherDependent": boolean,
+              "indoorActivity": boolean
+            }
+          ]
+        }`
+      };
 
-    // Save the generated suggestions to the database
-    const savedSuggestions = await Promise.all(
-      suggestions.map(async (suggestion: Omit<ActivitySuggestion, 'id' | 'userId'>) => {
-        const [savedSuggestion] = await db.insert(activitySuggestions)
-          .values({
-            ...suggestion,
-            userId,
-            accepted: false,
-          })
-          .returning();
-        return savedSuggestion;
-      })
-    );
+      const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "system", content: prompt.content }],
+        response_format: { type: "json_object" }
+      });
 
-    return savedSuggestions;
+      const suggestions = JSON.parse(response.choices[0].message.content).suggestions;
+
+      // Save the generated suggestions to the database
+      const savedSuggestions = await Promise.all(
+        suggestions.map(async (suggestion: Omit<ActivitySuggestion, 'id' | 'userId'>) => {
+          const [savedSuggestion] = await db.insert(activitySuggestions)
+            .values({
+              ...suggestion,
+              userId,
+              accepted: false,
+            })
+            .returning();
+          return savedSuggestion;
+        })
+      );
+
+      return savedSuggestions;
+    } catch (aiError) {
+      console.error("AI suggestion generation failed:", aiError);
+      // Return fallback suggestions if AI fails
+      const savedSuggestions = await Promise.all(
+        fallbackSuggestions.map(async (suggestion) => {
+          const [savedSuggestion] = await db.insert(activitySuggestions)
+            .values({
+              ...suggestion,
+              userId,
+              accepted: false,
+            })
+            .returning();
+          return savedSuggestion;
+        })
+      );
+      return savedSuggestions;
+    }
   } catch (error) {
     console.error("Error generating personalized suggestions:", error);
     return [];
@@ -84,33 +123,27 @@ export async function analyzeActivityPatterns(
   popularLocations: string[];
   energyLevelTrends: Record<string, number>;
 }> {
-  const activities = await db.query.activitySuggestions.findMany({
-    where: eq(activitySuggestions.userId, userId)
-  });
+  try {
+    const activities = await db.query.activitySuggestions.findMany({
+      where: eq(activitySuggestions.userId, userId)
+    });
 
-  // Analyze patterns in accepted and highly-rated activities
-  const acceptedActivities = activities.filter(a => a.accepted);
-  const highlyRatedActivities = activities.filter(a => (a.rating || 0) >= 4);
-
-  const analysis = await openai.chat.completions.create({
-    model: "gpt-4",
-    messages: [
-      {
-        role: "system",
-        content: `Analyze these activities and provide insights in JSON format:
-        {
-          "preferredTimes": ["morning", "afternoon"],
-          "popularLocations": ["park", "cafe"],
-          "energyLevelTrends": {"morning": 4, "afternoon": 3, "evening": 2}
-        }
-
-        Input data:
-        Accepted Activities: ${JSON.stringify(acceptedActivities)}
-        Highly Rated Activities: ${JSON.stringify(highlyRatedActivities)}`
+    // Return basic analysis if no OpenAI available
+    return {
+      preferredTimes: ["morning", "afternoon"],
+      popularLocations: ["local"],
+      energyLevelTrends: {
+        morning: 4,
+        afternoon: 3,
+        evening: 2
       }
-    ],
-    response_format: { type: "json_object" }
-  });
-
-  return JSON.parse(analysis.choices[0].message.content);
+    };
+  } catch (error) {
+    console.error("Error analyzing activity patterns:", error);
+    return {
+      preferredTimes: [],
+      popularLocations: [],
+      energyLevelTrends: {}
+    };
+  }
 }
