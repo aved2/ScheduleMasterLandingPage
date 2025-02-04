@@ -8,6 +8,7 @@ import Home from "@/pages/home";
 import Landing from "@/pages/landing";
 import Preferences from "@/pages/preferences";
 import NotFound from "@/pages/not-found";
+import Features from "@/pages/features";
 
 export default function App() {
   return (
