@@ -44,12 +44,18 @@ export default function Navbar() {
                     <span>Edit Preferences</span>
                   </DropdownMenuItem>
                 </Link>
-                <Link href="/calendars">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <CalendarPlus className="mr-2 h-4 w-4" />
-                    <span>Manage Calendars</span>
-                  </DropdownMenuItem>
-                </Link>
+                <DropdownMenuItem className="cursor-pointer" onSelect={() => window.open("/auth/google", "_blank")}>
+                  <CalendarPlus className="mr-2 h-4 w-4" />
+                  <span>Connect Google Calendar</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onSelect={() => window.open("/auth/outlook", "_blank")}>
+                  <CalendarPlus className="mr-2 h-4 w-4" />
+                  <span>Connect Outlook</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onSelect={() => window.open("/auth/apple", "_blank")}>
+                  <CalendarPlus className="mr-2 h-4 w-4" />
+                  <span>Connect Apple Calendar</span>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

@@ -61,12 +61,7 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Calendar Connections */}
-        <div className="flex justify-center gap-4 mb-16">
-          <Button variant="outline">Connect Google Calendar</Button>
-          <Button variant="outline">Connect Outlook</Button>
-          <Button variant="outline">Connect Apple Calendar</Button>
-        </div>
+        
 
         {/* Features */}
         <div className="grid md:grid-cols-2 gap-8 mb-16">
