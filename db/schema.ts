@@ -45,8 +45,12 @@ export const activitySuggestions = pgTable("activity_suggestions", {
   description: text("description"),
   duration: integer("duration").notNull(), // in minutes
   location: text("location"),
-  type: text("type").notNull(),
+  type: text("type").notNull(), // relaxing, active, social, educational
+  energyLevel: integer("energy_level").notNull(), // 1-5
+  weatherDependent: boolean("weather_dependent").default(false),
+  indoorActivity: boolean("indoor_activity").default(true),
   accepted: boolean("accepted").default(false),
+  rating: integer("rating"), // User feedback 1-5
 });
 
 export const userRelations = relations(users, ({ many }) => ({

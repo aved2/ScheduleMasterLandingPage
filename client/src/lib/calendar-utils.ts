@@ -3,8 +3,10 @@ import { Event } from "@db/schema";
 export function findFreeTimeSlots(
   events: Event[],
   date: Date,
-  minimumDuration: number
-): Array<{ start: Date; end: Date; duration: number }> {
+  minimumDuration: number,
+  maxDuration?: number,
+  energyLevel?: number
+): Array<{ start: Date; end: Date; duration: number; idealForEnergy: number }> {
   const dayStart = new Date(date.setHours(9, 0, 0, 0));
   const dayEnd = new Date(date.setHours(21, 0, 0, 0));
   
