@@ -7,6 +7,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
 import { searchNearbyPlaces } from "./services/place-suggestions";
 import { findFreeTimeSlots } from "@/lib/calendar-utils";
+import { generatePersonalizedSuggestions, analyzeActivityPatterns } from "./services/recommendation-engine";
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -46,6 +47,21 @@ export function registerRoutes(app: Express): Server {
       // Find free time slots
       const freeSlots = findFreeTimeSlots(userEvents, today, 30);
 
+      // Get past activity suggestions to learn from
+      const pastSuggestions = await db.query.activitySuggestions.findMany({
+        where: eq(activitySuggestions.userId, 1),
+      });
+
+      // Generate personalized suggestions using ML
+      const mlSuggestions = await generatePersonalizedSuggestions(1, {
+        pastActivities: pastSuggestions,
+        userPreferences: user?.preferences,
+        currentEvents: userEvents,
+        location: user?.location,
+        timeOfDay: new Date().getHours() < 12 ? 'morning' : 
+                   new Date().getHours() < 17 ? 'afternoon' : 'evening'
+      });
+
       // Get nearby places based on user preferences and free time
       let placeSuggestions: any[] = [];
       if (lat && lng && user?.preferences?.activityTypes) {
@@ -64,14 +80,9 @@ export function registerRoutes(app: Express): Server {
         );
       }
 
-      // Get existing suggestions from database
-      const dbSuggestions = await db.query.activitySuggestions.findMany({
-        where: eq(activitySuggestions.userId, 1),
-      });
-
-      // Combine and format all suggestions
+      // Combine ML suggestions with place suggestions
       const allSuggestions = [
-        ...dbSuggestions,
+        ...mlSuggestions,
         ...placeSuggestions.map(place => ({
           id: `place_${place.title}`,
           userId: 1,
@@ -86,6 +97,10 @@ export function registerRoutes(app: Express): Server {
           accepted: false,
         })),
       ];
+
+      // Analyze activity patterns to improve future suggestions
+      const patterns = await analyzeActivityPatterns(1);
+      console.log('Activity patterns:', patterns);
 
       res.json(allSuggestions);
     } catch (error) {
