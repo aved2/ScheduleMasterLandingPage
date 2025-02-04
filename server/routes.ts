@@ -5,21 +5,14 @@ import { events, users, activitySuggestions } from "@db/schema";
 import { eq } from "drizzle-orm";
 import { OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
-// Add necessary imports for Yelp and Google Places APIs here.  e.g.,  const yelp = require('yelp-fusion');
+import { searchNearbyPlaces } from "./services/place-suggestions";
+import { findFreeTimeSlots } from "@/lib/calendar-utils";
 
-
-const CLIENT_ID = '505387694243-rqk2uo1mfta52pdskhOg8llieg6rkNhb.apps.googleusercontent.com';
-const CLIENT_SECRET = 'GOCSPX-wY-6eXzPu3Pf6uW5nSWr4LZWSFY';
-const REDIRECT_URI = 'https://workspace.arkhthareddy.repl.co/oauth2callback';
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const REDIRECT_URI = process.env.REDIRECT_URI;
 
 const oauth2Client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
-
-// Add your Yelp API key here securely (e.g., using environment variables or Secrets).
-const YELP_API_KEY = process.env.YELP_API_KEY;
-
-// Add your Google Places API key here securely (e.g., using environment variables or Secrets).
-const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
-
 
 export function registerRoutes(app: Express): Server {
   const httpServer = createServer(app);
@@ -44,23 +37,59 @@ export function registerRoutes(app: Express): Server {
         where: eq(users.id, 1),
       });
 
+      // Get user's events for today
+      const today = new Date();
+      const userEvents = await db.query.events.findMany({
+        where: eq(events.userId, 1),
+      });
+
+      // Find free time slots
+      const freeSlots = findFreeTimeSlots(userEvents, today, 30);
+
+      // Get nearby places based on user preferences and free time
+      let placeSuggestions: any[] = [];
+      if (lat && lng && user?.preferences?.activityTypes) {
+        placeSuggestions = await searchNearbyPlaces(
+          {
+            latitude: Number(lat),
+            longitude: Number(lng),
+          },
+          1000,
+          user.preferences.activityTypes
+        );
+
+        // Filter suggestions based on available time slots
+        placeSuggestions = placeSuggestions.filter(suggestion => 
+          freeSlots.some(slot => slot.duration >= suggestion.duration)
+        );
+      }
+
+      // Get existing suggestions from database
       const dbSuggestions = await db.query.activitySuggestions.findMany({
         where: eq(activitySuggestions.userId, 1),
       });
 
-      let externalSuggestions = [];
-      if (lat && lng) {
-        const activityTypes = user?.preferences?.activityTypes || [];
-        const places = await Promise.all(
-          activityTypes.map(type => 
-            searchNearbyPlaces(Number(lat), Number(lng), type)
-          )
-        );
-        externalSuggestions = places.flat();
-      }
+      // Combine and format all suggestions
+      const allSuggestions = [
+        ...dbSuggestions,
+        ...placeSuggestions.map(place => ({
+          id: `place_${place.title}`,
+          userId: 1,
+          title: place.title,
+          description: place.description,
+          duration: place.duration,
+          location: place.location,
+          type: place.type,
+          energyLevel: place.energyLevel,
+          weatherDependent: place.weatherDependent,
+          indoorActivity: place.indoorActivity,
+          accepted: false,
+        })),
+      ];
 
-      res.json([...dbSuggestions, ...externalSuggestions]);
+      res.json(allSuggestions);
     } catch (error) {
+      console.error("Error in /api/suggestions:", error);
       res.status(500).json({ error: "Failed to fetch suggestions" });
     }
   });
@@ -90,52 +119,34 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Calendar integration endpoints
-  app.post('/api/calendars/google/connect', async (req, res) => {
-    const { code } = req.body;
+  // Accept a suggestion
+  app.post("/api/suggestions/:id/accept", async (req, res) => {
     try {
-      const { tokens } = await oauth2Client.getToken(code);
-      oauth2Client.setCredentials(tokens);
-      const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+      const { id } = req.params;
+      await db
+        .update(activitySuggestions)
+        .set({ accepted: true })
+        .where(eq(activitySuggestions.id, parseInt(id)));
       res.json({ success: true });
     } catch (error) {
-      res.status(500).json({ error: 'Failed to connect calendar' });
+      res.status(500).json({ error: "Failed to accept suggestion" });
     }
   });
 
-  app.get('/auth/google', (req, res) => {
-    const authUrl = oauth2Client.generateAuthUrl({
-      access_type: 'offline',
-      scope: [
-        'https://www.googleapis.com/auth/calendar.readonly',
-        'https://www.googleapis.com/auth/userinfo.profile',
-        'https://www.googleapis.com/auth/userinfo.email'
-      ]
-    });
-    res.redirect(authUrl);
-  });
-
-  app.get('/oauth2callback', async (req, res) => {
+  // Rate a suggestion
+  app.post("/api/suggestions/:id/rate", async (req, res) => {
     try {
-      const { code } = req.query;
-      const { tokens } = await oauth2Client.getToken(code as string);
-      oauth2Client.setCredentials(tokens);
-      res.redirect('/home');
+      const { id } = req.params;
+      const { rating } = req.body;
+      await db
+        .update(activitySuggestions)
+        .set({ rating })
+        .where(eq(activitySuggestions.id, parseInt(id)));
+      res.json({ success: true });
     } catch (error) {
-      res.status(500).json({ error: 'Authentication failed' });
+      res.status(500).json({ error: "Failed to rate suggestion" });
     }
   });
 
   return httpServer;
-}
-
-
-// Placeholder function - Replace with actual implementation using Yelp and Google Places APIs
-async function searchNearbyPlaces(lat: number, lng: number, activityType: string): Promise<any[]> {
-  // Implement API calls to Yelp and Google Places here.  This will require API keys and client libraries for both APIs.
-  // Example (replace with actual API calls):
-  // const yelpResponse = await yelp.search({ ... });
-  // const googleResponse = await googlePlacesClient.placesNearby({ ... });
-  // return [...yelpResponse.businesses, ...googleResponse.results];
-  return []; //Return empty array for now.
 }
