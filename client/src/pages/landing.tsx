@@ -96,6 +96,61 @@ export default function Landing() {
           </div>
         </div>
 
+        {/* New AI Assistant Section */}
+        <div className="mb-16 text-center">
+          <h2 className="text-2xl font-semibold mb-4">Just Ask What You Want To Do</h2>
+          <p className="text-lg text-muted-foreground mb-8">
+            Use your voice, email, or type to tell GoLucky what you want to do. Our AI handles the rest.
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Siri-like interface mockup */}
+            <div className="relative">
+              <div className="bg-black rounded-[40px] p-6 aspect-[9/19] shadow-xl">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-7 bg-black rounded-b-3xl" />
+                <div className="h-full bg-background rounded-[28px] p-4 flex flex-col">
+                  <div className="text-sm font-medium mb-2">Siri</div>
+                  <div className="bg-muted rounded-lg p-4 mb-4">
+                    <p className="text-sm">"What would you like to do?"</p>
+                  </div>
+                  <div className="mt-auto flex justify-center">
+                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full bg-primary animate-pulse" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Email interface mockup */}
+            <div className="relative">
+              <div className="bg-card rounded-lg shadow-lg p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-full bg-primary" />
+                  <div>
+                    <div className="font-medium">GoLucky Assistant</div>
+                    <div className="text-sm text-muted-foreground">assistant@golucky.ai</div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <p className="text-sm">Tell me what you'd like to do, and I'll help schedule it:</p>
+                  <div className="bg-muted rounded-lg p-4">
+                    <p className="text-sm font-medium">What would you like to do?</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 flex justify-center">
+            <div className="bg-primary/10 rounded-lg p-4 max-w-lg">
+              <p className="text-sm">
+                GoLucky's AI automatically fills in the details - finding the perfect time, location, and duration based on your preferences and schedule.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Calendar Preview Section */}
         <div className="mb-16 bg-muted rounded-lg p-8">
           <h2 className="text-3xl font-bold mb-6 text-center">Your Day, Enhanced</h2>
