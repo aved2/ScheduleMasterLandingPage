@@ -69,6 +69,42 @@ export default function Landing() {
           </div>
         </div>
 
+        {/* Calendar Preview Section */}
+        <div className="mb-16 bg-muted rounded-lg p-8">
+          <h2 className="text-3xl font-bold mb-6 text-center">Your Day, Enhanced</h2>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {sampleEvents.map((event) => (
+              <div
+                key={event.title}
+                className="bg-background rounded-lg p-6 shadow-sm transition-transform hover:scale-105"
+              >
+                <div className="text-4xl mb-4">{event.image}</div>
+                <h3 className="font-semibold mb-2">{event.title}</h3>
+                <p className="text-muted-foreground">{event.time}</p>
+                <span className="inline-block mt-2 text-sm px-2 py-1 bg-primary/10 rounded-full">
+                  {event.type}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Testimonials */}
+        <div className="mb-16">
+          <h2 className="text-3xl font-bold mb-6 text-center">What Users Say</h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            {testimonials.map((testimonial) => (
+              <div
+                key={testimonial.author}
+                className="bg-muted p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              >
+                <p className="mb-4 text-lg italic">{testimonial.text}</p>
+                <p className="font-semibold text-primary">{testimonial.author}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Integrations Section */}
         <div className="mb-16 text-center">
           <h2 className="text-2xl font-semibold mb-8">Pass data between your favorite tools. Connect all of your calendars.</h2>
@@ -157,42 +193,6 @@ export default function Landing() {
                 GoLucky's AI automatically fills in the details - finding the perfect time, location, and duration based on your preferences and schedule.
               </p>
             </div>
-          </div>
-        </div>
-
-        {/* Calendar Preview Section */}
-        <div className="mb-16 bg-muted rounded-lg p-8">
-          <h2 className="text-3xl font-bold mb-6 text-center">Your Day, Enhanced</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {sampleEvents.map((event) => (
-              <div
-                key={event.title}
-                className="bg-background rounded-lg p-6 shadow-sm transition-transform hover:scale-105"
-              >
-                <div className="text-4xl mb-4">{event.image}</div>
-                <h3 className="font-semibold mb-2">{event.title}</h3>
-                <p className="text-muted-foreground">{event.time}</p>
-                <span className="inline-block mt-2 text-sm px-2 py-1 bg-primary/10 rounded-full">
-                  {event.type}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Testimonials */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold mb-6 text-center">What Users Say</h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            {testimonials.map((testimonial) => (
-              <div
-                key={testimonial.author}
-                className="bg-muted p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-              >
-                <p className="mb-4 text-lg italic">{testimonial.text}</p>
-                <p className="font-semibold text-primary">{testimonial.author}</p>
-              </div>
-            ))}
           </div>
         </div>
       </main>
