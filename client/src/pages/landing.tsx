@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Calendar } from "lucide-react";
+import { SiZoom, SiGooglecalendar, SiGoogle, SiZapier } from "react-icons/si";
+import { BiLogoMicrosoft } from "react-icons/bi";
 
 export default function Landing() {
   const testimonials = [
@@ -67,12 +69,39 @@ export default function Landing() {
           </div>
         </div>
 
+        {/* Integrations Section */}
+        <div className="mb-16 text-center">
+          <h2 className="text-2xl font-semibold mb-8">Pass data between your favorite tools. Connect all of your calendars.</h2>
+
+          {/* Platform integrations */}
+          <div className="mb-8">
+            <p className="text-muted-foreground mb-4">GoLucky integrates with...</p>
+            <div className="flex justify-center items-center gap-8 mb-8">
+              <SiZapier className="w-12 h-12 text-primary" title="Zapier" />
+              <SiZoom className="w-12 h-12 text-primary" title="Zoom" />
+              <SiGoogle className="w-12 h-12 text-primary" title="Google Meet" />
+              <SiGoogle className="w-12 h-12 text-primary" title="Gmail" />
+              <BiLogoMicrosoft className="w-12 h-12 text-primary" title="Outlook" />
+            </div>
+          </div>
+
+          {/* Calendar connections */}
+          <div>
+            <p className="text-muted-foreground mb-4">GoLucky connects to these calendars...</p>
+            <div className="flex justify-center items-center gap-8">
+              <SiGooglecalendar className="w-12 h-12 text-primary" title="Google Calendar" />
+              <BiLogoMicrosoft className="w-12 h-12 text-primary" title="Outlook Calendar" />
+              <SiGoogle className="w-12 h-12 text-primary" title="Apple Calendar" />
+            </div>
+          </div>
+        </div>
+
         {/* Calendar Preview Section */}
         <div className="mb-16 bg-muted rounded-lg p-8">
           <h2 className="text-3xl font-bold mb-6 text-center">Your Day, Enhanced</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {sampleEvents.map((event) => (
-              <div 
+              <div
                 key={event.title}
                 className="bg-background rounded-lg p-6 shadow-sm transition-transform hover:scale-105"
               >
@@ -92,8 +121,8 @@ export default function Landing() {
           <h2 className="text-3xl font-bold mb-6 text-center">What Users Say</h2>
           <div className="grid md:grid-cols-2 gap-8">
             {testimonials.map((testimonial) => (
-              <div 
-                key={testimonial.author} 
+              <div
+                key={testimonial.author}
                 className="bg-muted p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow"
               >
                 <p className="mb-4 text-lg italic">{testimonial.text}</p>
