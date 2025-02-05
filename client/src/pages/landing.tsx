@@ -111,7 +111,13 @@ export default function Landing() {
                 <div className="h-full bg-background rounded-[28px] p-4 flex flex-col">
                   <div className="text-sm font-medium mb-2">Siri</div>
                   <div className="bg-muted rounded-lg p-4 mb-4">
-                    <p className="text-sm">"What would you like to do?"</p>
+                    <p className="text-sm">"I see you have some free time right now, would you like to do anything?"</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    <Button variant="outline" className="w-full">Bored</Button>
+                    <Button variant="outline" className="w-full">Hungry</Button>
+                    <Button variant="outline" className="w-full">Learn</Button>
+                    <Button variant="outline" className="w-full">Activity</Button>
                   </div>
                   <div className="mt-auto flex justify-center">
                     <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
@@ -133,9 +139,12 @@ export default function Landing() {
                   </div>
                 </div>
                 <div className="space-y-4">
-                  <p className="text-sm">Tell me what you'd like to do, and I'll help schedule it:</p>
-                  <div className="bg-muted rounded-lg p-4">
-                    <p className="text-sm font-medium">What would you like to do?</p>
+                  <p className="text-sm">I see you have some free time right now, would you like to do anything?</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" size="sm" className="w-full">Bored</Button>
+                    <Button variant="outline" size="sm" className="w-full">Hungry</Button>
+                    <Button variant="outline" size="sm" className="w-full">Learn</Button>
+                    <Button variant="outline" size="sm" className="w-full">Activity</Button>
                   </div>
                 </div>
               </div>
