@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "lucide-react";
 import { SiZoom, SiGooglecalendar, SiGoogle, SiZapier } from "react-icons/si";
 import { BiLogoMicrosoft } from "react-icons/bi";
+import { Link } from "wouter";
 
 export default function Landing() {
   const testimonials = [
@@ -62,9 +63,11 @@ export default function Landing() {
             World's First AI-Powered Recommendation System Built Around Your Personal and Work Calendars
           </p>
           <div className="flex gap-4 justify-center">
-            <Button size="lg" className="gap-2">
-              <Calendar className="h-5 w-5" />
-              Get Started Free
+            <Button size="lg" className="gap-2" asChild>
+              <Link href="/auth">
+                <Calendar className="h-5 w-5" />
+                Get Started Free
+              </Link>
             </Button>
           </div>
         </div>
