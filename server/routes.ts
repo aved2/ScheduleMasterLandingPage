@@ -9,6 +9,8 @@ import { searchNearbyPlaces } from "./services/place-suggestions";
 import { findFreeTimeSlots } from "@/lib/calendar-utils";
 import { generatePersonalizedSuggestions, analyzeActivityPatterns } from "./services/recommendation-engine";
 import { nanoid } from 'nanoid';
+import { WebSocket } from "ws";
+
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -289,6 +291,215 @@ export function registerRoutes(app: Express): Server {
     } catch (error) {
       console.error("Error fetching shared activities:", error);
       res.status(500).json({ error: "Failed to fetch shared activities" });
+    }
+  });
+
+
+  // Create a collaborative event
+  app.post("/api/collaborative-events", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const { title, description, votingDeadline, category } = req.body;
+
+      // First create the base event
+      const [event] = await db.insert(events)
+        .values({
+          userId: req.user.id,
+          title,
+          description,
+          category,
+          isCollaborative: true,
+          startTime: new Date(), // Will be updated after voting
+          endTime: new Date(), // Will be updated after voting
+        })
+        .returning();
+
+      // Then create the collaborative event details
+      const [collaborativeEvent] = await db.insert(collaborativeEvents)
+        .values({
+          eventId: event.id,
+          createdBy: req.user.id,
+          votingDeadline: new Date(votingDeadline),
+        })
+        .returning();
+
+      // Add creator as first participant
+      await db.insert(collaborativeEventParticipants)
+        .values({
+          collaborativeEventId: collaborativeEvent.id,
+          userId: req.user.id,
+          role: 'organizer',
+          status: 'accepted',
+        });
+
+      res.status(201).json({ event, collaborativeEvent });
+    } catch (error) {
+      console.error("Error creating collaborative event:", error);
+      res.status(500).json({ error: "Failed to create collaborative event" });
+    }
+  });
+
+  // Get collaborative event details
+  app.get("/api/collaborative-events/:id", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const { id } = req.params;
+
+      const event = await db.query.collaborativeEvents.findFirst({
+        where: eq(collaborativeEvents.id, parseInt(id)),
+        with: {
+          event: true,
+          participants: {
+            with: {
+              user: true,
+            },
+          },
+          timeSlots: true,
+          locations: true,
+        },
+      });
+
+      if (!event) {
+        return res.status(404).json({ error: "Event not found" });
+      }
+
+      // Check if user is a participant
+      const isParticipant = event.participants.some(p => p.user.id === req.user?.id);
+      if (!isParticipant) {
+        return res.status(403).json({ error: "Not authorized to view this event" });
+      }
+
+      res.json(event);
+    } catch (error) {
+      console.error("Error fetching collaborative event:", error);
+      res.status(500).json({ error: "Failed to fetch collaborative event" });
+    }
+  });
+
+  // Add participant to collaborative event
+  app.post("/api/collaborative-events/:id/participants", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const { id } = req.params;
+      const { userId } = req.body;
+
+      const [participant] = await db.insert(collaborativeEventParticipants)
+        .values({
+          collaborativeEventId: parseInt(id),
+          userId,
+          role: 'participant',
+          status: 'pending',
+        })
+        .returning();
+
+      res.status(201).json(participant);
+    } catch (error) {
+      console.error("Error adding participant:", error);
+      res.status(500).json({ error: "Failed to add participant" });
+    }
+  });
+
+  // Propose a time slot
+  app.post("/api/collaborative-events/:id/time-slots", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const { id } = req.params;
+      const { startTime, endTime } = req.body;
+
+      const [timeSlot] = await db.insert(timeSlotProposals)
+        .values({
+          collaborativeEventId: parseInt(id),
+          proposedBy: req.user.id,
+          startTime: new Date(startTime),
+          endTime: new Date(endTime),
+        })
+        .returning();
+
+      res.status(201).json(timeSlot);
+    } catch (error) {
+      console.error("Error proposing time slot:", error);
+      res.status(500).json({ error: "Failed to propose time slot" });
+    }
+  });
+
+  // Vote on a time slot
+  app.post("/api/time-slots/:id/vote", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const { id } = req.params;
+      const { preference } = req.body;
+
+      const [vote] = await db.insert(timeSlotVotes)
+        .values({
+          timeSlotId: parseInt(id),
+          userId: req.user.id,
+          preference,
+        })
+        .returning();
+
+      res.status(201).json(vote);
+    } catch (error) {
+      console.error("Error voting on time slot:", error);
+      res.status(500).json({ error: "Failed to vote on time slot" });
+    }
+  });
+
+  // Propose a location
+  app.post("/api/collaborative-events/:id/locations", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const { id } = req.params;
+      const { location, details } = req.body;
+
+      const [locationProposal] = await db.insert(locationProposals)
+        .values({
+          collaborativeEventId: parseInt(id),
+          proposedBy: req.user.id,
+          location,
+          details,
+        })
+        .returning();
+
+      res.status(201).json(locationProposal);
+    } catch (error) {
+      console.error("Error proposing location:", error);
+      res.status(500).json({ error: "Failed to propose location" });
+    }
+  });
+
+  // Vote on a location
+  app.post("/api/locations/:id/vote", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const { id } = req.params;
+      const { preference } = req.body;
+
+      const [vote] = await db.insert(locationVotes)
+        .values({
+          locationProposalId: parseInt(id),
+          userId: req.user.id,
+          preference,
+        })
+        .returning();
+
+      res.status(201).json(vote);
+    } catch (error) {
+      console.error("Error voting on location:", error);
+      res.status(500).json({ error: "Failed to vote on location" });
     }
   });
 
