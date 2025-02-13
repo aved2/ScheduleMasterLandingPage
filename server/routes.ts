@@ -21,28 +21,36 @@ export function registerRoutes(app: Express): Server {
 
   // Get user's events
   app.get("/api/events", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
     try {
       const userEvents = await db.query.events.findMany({
-        where: eq(events.userId, 1),
+        where: eq(events.userId, req.user.id),
       });
       res.json(userEvents);
     } catch (error) {
+      console.error("Error fetching events:", error);
       res.status(500).json({ error: "Failed to fetch events" });
     }
   });
 
   // Get user's activity suggestions
   app.get("/api/suggestions", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
     try {
       const { lat, lng } = req.query;
       const user = await db.query.users.findFirst({
-        where: eq(users.id, 1),
+        where: eq(users.id, req.user.id),
       });
 
       // Get user's events for today
       const today = new Date();
       const userEvents = await db.query.events.findMany({
-        where: eq(events.userId, 1),
+        where: eq(events.userId, req.user.id),
       });
 
       // Find free time slots
@@ -50,11 +58,11 @@ export function registerRoutes(app: Express): Server {
 
       // Get past activity suggestions to learn from
       const pastSuggestions = await db.query.activitySuggestions.findMany({
-        where: eq(activitySuggestions.userId, 1),
+        where: eq(activitySuggestions.userId, req.user.id),
       });
 
       // Generate personalized suggestions using ML
-      const mlSuggestions = await generatePersonalizedSuggestions(1, {
+      const mlSuggestions = await generatePersonalizedSuggestions(req.user.id, {
         pastActivities: pastSuggestions,
         userPreferences: user?.preferences,
         currentEvents: userEvents,
@@ -86,7 +94,7 @@ export function registerRoutes(app: Express): Server {
         ...mlSuggestions,
         ...placeSuggestions.map(place => ({
           id: `place_${place.title}`,
-          userId: 1,
+          userId: req.user.id,
           title: place.title,
           description: place.description,
           duration: place.duration,
@@ -100,7 +108,7 @@ export function registerRoutes(app: Express): Server {
       ];
 
       // Analyze activity patterns to improve future suggestions
-      const patterns = await analyzeActivityPatterns(1);
+      const patterns = await analyzeActivityPatterns(req.user.id);
       console.log('Activity patterns:', patterns);
 
       res.json(allSuggestions);
@@ -112,9 +120,12 @@ export function registerRoutes(app: Express): Server {
 
   // Get user preferences
   app.get("/api/preferences", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
     try {
       const user = await db.query.users.findFirst({
-        where: eq(users.id, 1),
+        where: eq(users.id, req.user.id),
       });
       res.json(user?.preferences);
     } catch (error) {
@@ -124,11 +135,14 @@ export function registerRoutes(app: Express): Server {
 
   // Update user preferences
   app.post("/api/preferences", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
     try {
       await db
         .update(users)
         .set({ preferences: req.body })
-        .where(eq(users.id, 1));
+        .where(eq(users.id, req.user.id));
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to update preferences" });
@@ -137,6 +151,9 @@ export function registerRoutes(app: Express): Server {
 
   // Accept a suggestion
   app.post("/api/suggestions/:id/accept", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
     try {
       const { id } = req.params;
       await db
@@ -151,6 +168,9 @@ export function registerRoutes(app: Express): Server {
 
   // Rate a suggestion
   app.post("/api/suggestions/:id/rate", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
     try {
       const { id } = req.params;
       const { rating } = req.body;
@@ -166,6 +186,9 @@ export function registerRoutes(app: Express): Server {
 
   // Share an activity
   app.post("/api/activities/:id/share", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
     try {
       const { id } = req.params;
       const { isPublic } = req.body;
@@ -178,7 +201,7 @@ export function registerRoutes(app: Express): Server {
         .set({
           isPublic,
           shareCode,
-          sharedBy: req.session?.userId,
+          sharedBy: req.user.id,
           sharedAt: new Date(),
           shareCount: (activity) => activity.shareCount + 1
         })
@@ -198,6 +221,9 @@ export function registerRoutes(app: Express): Server {
 
   // Share activity with specific users
   app.post("/api/activities/:id/share-with-users", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
     try {
       const { id } = req.params;
       const { userIds } = req.body;
@@ -207,7 +233,7 @@ export function registerRoutes(app: Express): Server {
           const [share] = await db.insert(sharedActivities)
             .values({
               activityId: parseInt(id),
-              sharedByUserId: req.session?.userId,
+              sharedByUserId: req.user.id,
               sharedWithUserId: userId,
               sharedAt: new Date(),
               status: 'pending'
@@ -237,7 +263,7 @@ export function registerRoutes(app: Express): Server {
         return res.status(404).json({ error: "Shared activity not found" });
       }
 
-      if (!activity.isPublic && !req.session?.userId) {
+      if (!activity.isPublic && !req.user) {
         return res.status(401).json({ error: "Authentication required to view this activity" });
       }
 
@@ -250,9 +276,12 @@ export function registerRoutes(app: Express): Server {
 
   // Get activities shared with me
   app.get("/api/shared-with-me", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
     try {
       const sharedActivities = await db.query.sharedActivities.findMany({
-        where: eq(sharedActivities.sharedWithUserId, req.session?.userId),
+        where: eq(sharedActivities.sharedWithUserId, req.user.id),
         orderBy: desc(sharedActivities.sharedAt)
       });
 

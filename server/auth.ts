@@ -85,7 +85,10 @@ export function setupAuth(app: Express) {
     }),
   );
 
-  passport.serializeUser((user, done) => done(null, user.id));
+  passport.serializeUser((user, done) => {
+    done(null, (user as User).id);
+  });
+
   passport.deserializeUser(async (id: number, done) => {
     try {
       const [user] = await db
@@ -99,43 +102,50 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/register", async (req, res, next) => {
+  app.post("/api/register", async (req, res) => {
     try {
       const result = userSchema.safeParse(req.body);
       if (!result.success) {
         const error = fromZodError(result.error);
-        return res.status(400).json({ error: error.toString() });
+        return res.status(400).json({ error: error.message });
       }
 
       const { username, password, location, preferences } = result.data;
 
+      // Check for existing user
       const [existingUser] = await getUserByUsername(username);
       if (existingUser) {
         return res.status(400).json({ error: "Username already exists" });
       }
 
+      // Hash password and create user
       const hashedPassword = await hashPassword(password);
-      const [user] = await db
-        .insert(users)
-        .values({
-          username,
-          password: hashedPassword,
-          location,
-          preferences
-        })
-        .returning();
 
+      // Insert new user
+      const [user] = await db.insert(users).values({
+        username,
+        password: hashedPassword,
+        location,
+        preferences
+      }).returning();
+
+      // Log in the new user
       req.login(user, (err) => {
-        if (err) return next(err);
-        res.status(201).json(user);
+        if (err) {
+          console.error("Login error after registration:", err);
+          return res.status(500).json({ error: "Error logging in after registration" });
+        }
+        return res.status(201).json(user);
       });
+
     } catch (err) {
-      next(err);
+      console.error("Registration error:", err);
+      return res.status(500).json({ error: "Internal server error during registration" });
     }
   });
 
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", (err: Error | null, user: User | false, info: { message: string } | undefined) => {
       if (err) return next(err);
       if (!user) {
         return res.status(401).json({ error: info?.message || "Authentication failed" });
