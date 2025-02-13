@@ -5,10 +5,24 @@ import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
-import { users, insertUserSchema, type User } from "@db/schema";
+import { users } from "@db/schema";
 import { db, pool } from "@db";
 import { eq } from "drizzle-orm";
 import { fromZodError } from "zod-validation-error";
+import { z } from "zod";
+
+const userSchema = z.object({
+  username: z.string().min(3),
+  password: z.string().min(6),
+  location: z.string().optional(),
+  preferences: z.object({
+    dietaryRestrictions: z.array(z.string()).optional(),
+    interests: z.array(z.string()).optional(),
+    activityTypes: z.array(z.string()).optional()
+  }).optional()
+});
+
+type User = typeof users.$inferSelect;
 
 declare global {
   namespace Express {
@@ -86,23 +100,28 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/register", async (req, res, next) => {
-    const result = insertUserSchema.safeParse(req.body);
-    if (!result.success) {
-      const error = fromZodError(result.error);
-      return res.status(400).send(error.toString());
-    }
-
     try {
-      const [existingUser] = await getUserByUsername(result.data.username);
-      if (existingUser) {
-        return res.status(400).send("Username already exists");
+      const result = userSchema.safeParse(req.body);
+      if (!result.success) {
+        const error = fromZodError(result.error);
+        return res.status(400).json({ error: error.toString() });
       }
 
+      const { username, password, location, preferences } = result.data;
+
+      const [existingUser] = await getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ error: "Username already exists" });
+      }
+
+      const hashedPassword = await hashPassword(password);
       const [user] = await db
         .insert(users)
         .values({
-          ...result.data,
-          password: await hashPassword(result.data.password),
+          username,
+          password: hashedPassword,
+          location,
+          preferences
         })
         .returning();
 
@@ -119,7 +138,7 @@ export function setupAuth(app: Express) {
     passport.authenticate("local", (err, user, info) => {
       if (err) return next(err);
       if (!user) {
-        return res.status(401).json({ message: info?.message || "Authentication failed" });
+        return res.status(401).json({ error: info?.message || "Authentication failed" });
       }
       req.login(user, (err) => {
         if (err) return next(err);
