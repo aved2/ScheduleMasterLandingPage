@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/lib/protected-route";
 import Home from "@/pages/home";
 import Landing from "@/pages/landing";
 import Preferences from "@/pages/preferences";
+import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 import Features from "@/pages/features";
 import Calendars from "@/pages/calendars";
@@ -25,6 +26,7 @@ export default function App() {
           <ProtectedRoute path="/app" component={Home} />
           <ProtectedRoute path="/preferences" component={Preferences} />
           <ProtectedRoute path="/calendars" component={Calendars} />
+          <ProtectedRoute path="/profile" component={Profile} />
           <Route component={NotFound} />
         </Switch>
         <Toaster />

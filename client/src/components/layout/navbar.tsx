@@ -1,14 +1,22 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Calendar, Settings, CalendarPlus, UserCog } from "lucide-react";
+import { Calendar, Settings, CalendarPlus, UserCog, User, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
 export default function Navbar() {
+  const { user, logoutMutation } = useAuth();
+
+  const handleLogout = async () => {
+    await logoutMutation.mutateAsync();
+  };
+
   return (
     <nav className="border-b">
       <div className="container mx-auto px-4">
@@ -26,32 +34,57 @@ export default function Navbar() {
                 Features
               </Button>
             </Link>
-            <Link href="/app">
-              <Button variant="default" className="gap-2">
-                Go to App
-              </Button>
-            </Link>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Settings className="h-4 w-4" />
+            {user ? (
+              <>
+                <Link href="/app">
+                  <Button variant="default" className="gap-2">
+                    Dashboard
+                  </Button>
+                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <Link href="/profile">
+                      <DropdownMenuItem className="cursor-pointer">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Profile</span>
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/preferences">
+                      <DropdownMenuItem className="cursor-pointer">
+                        <UserCog className="mr-2 h-4 w-4" />
+                        <span>Edit Preferences</span>
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/calendars">
+                      <DropdownMenuItem className="cursor-pointer">
+                        <CalendarPlus className="mr-2 h-4 w-4" />
+                        <span>Edit Calendars</span>
+                      </DropdownMenuItem>
+                    </Link>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      className="cursor-pointer text-destructive"
+                      onClick={handleLogout}
+                      disabled={logoutMutation.isPending}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Logout</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <Link href="/auth">
+                <Button variant="default" className="gap-2">
+                  Login
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <Link href="/preferences">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <UserCog className="mr-2 h-4 w-4" />
-                    <span>Edit Preferences</span>
-                  </DropdownMenuItem>
-                </Link>
-                <Link href="/calendars">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <CalendarPlus className="mr-2 h-4 w-4" />
-                    <span>Edit Calendars</span>
-                  </DropdownMenuItem>
-                </Link>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </Link>
+            )}
           </div>
         </div>
       </div>
