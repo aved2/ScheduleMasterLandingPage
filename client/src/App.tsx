@@ -11,6 +11,7 @@ import Preferences from "@/pages/preferences";
 import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 import Features from "@/pages/features";
+import Roadmap from "@/pages/roadmap";
 import Calendars from "@/pages/calendars";
 import Auth from "@/pages/auth";
 import CollaborativeEvent from "@/pages/collaborative-event";
@@ -23,6 +24,7 @@ export default function App() {
         <Switch>
           <Route path="/" component={Landing} />
           <Route path="/features" component={Features} />
+          <Route path="/roadmap" component={Roadmap} />
           <Route path="/auth" component={Auth} />
           <ProtectedRoute path="/app" component={Home} />
           <ProtectedRoute path="/preferences" component={Preferences} />

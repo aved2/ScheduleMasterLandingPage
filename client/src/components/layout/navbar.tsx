@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Calendar, Settings, CalendarPlus, UserCog, User, LogOut, Users } from "lucide-react";
+import { Calendar, Settings, CalendarPlus, UserCog, User, LogOut, Users, Map } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import {
   DropdownMenu,
@@ -32,6 +32,12 @@ export default function Navbar() {
             <Link href="/features">
               <Button variant="ghost" className="gap-2">
                 Features
+              </Button>
+            </Link>
+            <Link href="/roadmap">
+              <Button variant="ghost" className="gap-2">
+                <Map className="h-4 w-4" />
+                Roadmap
               </Button>
             </Link>
             {user ? (
