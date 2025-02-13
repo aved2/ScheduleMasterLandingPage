@@ -3,26 +3,32 @@ import { Route, Switch } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import { queryClient } from "@/lib/queryClient";
 import Navbar from "@/components/layout/navbar";
+import { AuthProvider } from "@/hooks/use-auth";
+import { ProtectedRoute } from "@/lib/protected-route";
 import Home from "@/pages/home";
 import Landing from "@/pages/landing";
 import Preferences from "@/pages/preferences";
 import NotFound from "@/pages/not-found";
 import Features from "@/pages/features";
-import Calendars from "@/pages/calendars"; // Added import for Calendars
+import Calendars from "@/pages/calendars";
+import Auth from "@/pages/auth";
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Navbar />
-      <Switch>
-        <Route path="/" component={Landing} />
-        <Route path="/features" component={Features} />
-        <Route path="/app" component={Home} />
-        <Route path="/preferences" component={Preferences} />
-        <Route path="/calendars" component={Calendars} /> {/* Added route for Calendars */}
-        <Route component={NotFound} />
-      </Switch>
-      <Toaster />
+      <AuthProvider>
+        <Navbar />
+        <Switch>
+          <Route path="/" component={Landing} />
+          <Route path="/features" component={Features} />
+          <Route path="/auth" component={Auth} />
+          <ProtectedRoute path="/app" component={Home} />
+          <ProtectedRoute path="/preferences" component={Preferences} />
+          <ProtectedRoute path="/calendars" component={Calendars} />
+          <Route component={NotFound} />
+        </Switch>
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
