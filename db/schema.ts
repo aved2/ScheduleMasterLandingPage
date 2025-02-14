@@ -88,12 +88,25 @@ export const locationVotes = pgTable("location_votes", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// New table for user connections
+export const userConnections = pgTable("user_connections", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  connectedUserId: integer("connected_user_id").references(() => users.id),
+  status: text("status").notNull().default('pending'), // pending, accepted, rejected
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const userRelations = relations(users, ({ many }) => ({
   events: many(events),
   suggestions: many(activitySuggestions),
   collaborativeEventsCreated: many(collaborativeEvents, { relationName: "eventsCreated" }),
   collaborativeEventsParticipating: many(collaborativeEventParticipants),
+  // Fix the relations syntax for user connections
+  sentConnections: many(userConnections),
+  receivedConnections: many(userConnections)
 }));
 
 export const eventRelations = relations(events, ({ one, many }) => ({
@@ -109,6 +122,12 @@ export const collaborativeEventRelations = relations(collaborativeEvents, ({ one
   locations: many(locationProposals),
 }));
 
+export const userConnectionRelations = relations(userConnections, ({ one }) => ({
+  user: one(users, { fields: [userConnections.userId], references: [users.id] }),
+  connectedUser: one(users, { fields: [userConnections.connectedUserId], references: [users.id] }),
+}));
+
+
 // Export schemas for validation
 export const insertUserSchema = createInsertSchema(users);
 export const selectUserSchema = createSelectSchema(users);
@@ -116,6 +135,8 @@ export const insertEventSchema = createInsertSchema(events);
 export const selectEventSchema = createSelectSchema(events);
 export const insertCollaborativeEventSchema = createInsertSchema(collaborativeEvents);
 export const selectCollaborativeEventSchema = createSelectSchema(collaborativeEvents);
+export const insertUserConnectionSchema = createInsertSchema(userConnections);
+export const selectUserConnectionSchema = createSelectSchema(userConnections);
 
 // Type exports
 export type User = typeof users.$inferSelect;
@@ -124,6 +145,7 @@ export type CollaborativeEvent = typeof collaborativeEvents.$inferSelect;
 export type CollaborativeEventParticipant = typeof collaborativeEventParticipants.$inferSelect;
 export type TimeSlotProposal = typeof timeSlotProposals.$inferSelect;
 export type LocationProposal = typeof locationProposals.$inferSelect;
+export type UserConnection = typeof userConnections.$inferSelect;
 
 export const activitySuggestions = pgTable("activity_suggestions", {
   id: serial("id").primaryKey(),

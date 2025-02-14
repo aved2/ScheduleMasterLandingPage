@@ -66,6 +66,12 @@ export default function Navbar() {
                         <span>Profile</span>
                       </DropdownMenuItem>
                     </Link>
+                    <Link href="/connections">
+                      <DropdownMenuItem className="cursor-pointer">
+                        <Users className="mr-2 h-4 w-4" />
+                        <span>Connections</span>
+                      </DropdownMenuItem>
+                    </Link>
                     <Link href="/preferences">
                       <DropdownMenuItem className="cursor-pointer">
                         <UserCog className="mr-2 h-4 w-4" />

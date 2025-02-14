@@ -15,6 +15,7 @@ import Roadmap from "@/pages/roadmap";
 import Calendars from "@/pages/calendars";
 import Auth from "@/pages/auth";
 import CollaborativeEvent from "@/pages/collaborative-event";
+import Connections from "@/pages/connections";
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
           <ProtectedRoute path="/preferences" component={Preferences} />
           <ProtectedRoute path="/calendars" component={Calendars} />
           <ProtectedRoute path="/profile" component={Profile} />
+          <ProtectedRoute path="/connections" component={Connections} />
           <ProtectedRoute path="/collaborative-event" component={CollaborativeEvent} />
           <Route component={NotFound} />
         </Switch>
