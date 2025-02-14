@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { getQueryFn, apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useState } from "react";
 import { UserPlus, Users, Check, X, Loader2, User as UserIcon } from "lucide-react";
 import type { User, UserConnection } from "@db/schema";
@@ -19,14 +19,23 @@ export default function Connections() {
   // Query for searching users
   const { data: searchResults, isLoading: isSearching } = useQuery({
     queryKey: ["/api/users/search", searchQuery],
-    queryFn: () => getQueryFn()(`/api/users/search?q=${encodeURIComponent(searchQuery)}`),
+    queryFn: async () => {
+      if (searchQuery.length < 3) return [];
+      const res = await fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}`);
+      if (!res.ok) throw new Error('Failed to search users');
+      return res.json();
+    },
     enabled: searchQuery.length >= 3,
   });
 
   // Query for getting user's connections
   const { data: connections, isLoading: isLoadingConnections } = useQuery({
     queryKey: ["/api/users/connections"],
-    queryFn: getQueryFn(),
+    queryFn: async () => {
+      const res = await fetch('/api/users/connections');
+      if (!res.ok) throw new Error('Failed to fetch connections');
+      return res.json();
+    },
   });
 
   // Mutation for sending connection request
@@ -81,7 +90,7 @@ export default function Connections() {
               </div>
             ) : searchResults?.length ? (
               <div className="space-y-4">
-                {searchResults.map((result) => (
+                {searchResults.map((result: User) => (
                   <div key={result.id} className="flex items-center justify-between p-4 bg-muted rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -128,7 +137,7 @@ export default function Connections() {
             </div>
           ) : connections?.pending?.length ? (
             <div className="space-y-4">
-              {connections.pending.map((connection) => (
+              {connections.pending.map((connection: ConnectionWithUser) => (
                 <div key={connection.id} className="flex items-center justify-between p-4 bg-muted rounded-lg">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -186,7 +195,7 @@ export default function Connections() {
             </div>
           ) : connections?.accepted?.length ? (
             <div className="space-y-4">
-              {connections.accepted.map((connection) => (
+              {connections.accepted.map((connection: ConnectionWithUser) => (
                 <div key={connection.id} className="flex items-center justify-between p-4 bg-muted rounded-lg">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
