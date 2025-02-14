@@ -17,17 +17,14 @@ export default function Connections() {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Query for searching users
-  const { data: searchResults, isLoading: isSearching } = useQuery<User[]>({
+  const { data: searchResults, isLoading: isSearching } = useQuery({
     queryKey: ["/api/users/search", searchQuery],
-    queryFn: getQueryFn({ params: { q: searchQuery } }),
+    queryFn: () => getQueryFn()(`/api/users/search?q=${encodeURIComponent(searchQuery)}`),
     enabled: searchQuery.length >= 3,
   });
 
   // Query for getting user's connections
-  const { data: connections, isLoading: isLoadingConnections } = useQuery<{
-    pending: ConnectionWithUser[];
-    accepted: ConnectionWithUser[];
-  }>({
+  const { data: connections, isLoading: isLoadingConnections } = useQuery({
     queryKey: ["/api/users/connections"],
     queryFn: getQueryFn(),
   });
@@ -82,9 +79,9 @@ export default function Connections() {
               <div className="flex items-center justify-center p-4">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
-            ) : searchResults?.length > 0 ? (
+            ) : searchResults?.length ? (
               <div className="space-y-4">
-                {searchResults.map((result: User) => (
+                {searchResults.map((result) => (
                   <div key={result.id} className="flex items-center justify-between p-4 bg-muted rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -129,7 +126,7 @@ export default function Connections() {
             <div className="flex items-center justify-center p-4">
               <Loader2 className="h-6 w-6 animate-spin" />
             </div>
-          ) : connections?.pending?.length > 0 ? (
+          ) : connections?.pending?.length ? (
             <div className="space-y-4">
               {connections.pending.map((connection) => (
                 <div key={connection.id} className="flex items-center justify-between p-4 bg-muted rounded-lg">
@@ -187,7 +184,7 @@ export default function Connections() {
             <div className="flex items-center justify-center p-4">
               <Loader2 className="h-6 w-6 animate-spin" />
             </div>
-          ) : connections?.accepted?.length > 0 ? (
+          ) : connections?.accepted?.length ? (
             <div className="space-y-4">
               {connections.accepted.map((connection) => (
                 <div key={connection.id} className="flex items-center justify-between p-4 bg-muted rounded-lg">
