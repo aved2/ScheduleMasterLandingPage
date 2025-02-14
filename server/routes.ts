@@ -1,8 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { db } from "@db";
-import { events, users, activitySuggestions, sharedActivities } from "@db/schema";
-import { eq, desc } from "drizzle-orm";
+import { events, users, activitySuggestions, sharedActivities, userConnections } from "@db/schema";
+import { eq, desc, ilike, or, and } from "drizzle-orm";
 import { OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
 import { searchNearbyPlaces } from "./services/place-suggestions";
@@ -500,6 +500,163 @@ export function registerRoutes(app: Express): Server {
     } catch (error) {
       console.error("Error voting on location:", error);
       res.status(500).json({ error: "Failed to vote on location" });
+    }
+  });
+
+  // Search users
+  app.get("/api/users/search", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const { q } = req.query;
+      if (typeof q !== 'string' || q.length < 3) {
+        return res.status(400).json({ error: "Search query must be at least 3 characters" });
+      }
+
+      const searchResults = await db.query.users.findMany({
+        where: ilike(users.username, `%${q}%`),
+        columns: {
+          id: true,
+          username: true,
+          location: true,
+        },
+      });
+
+      // Filter out the current user and limit results
+      const filteredResults = searchResults
+        .filter(user => user.id !== req.user?.id)
+        .slice(0, 10);
+
+      res.json(filteredResults);
+    } catch (error) {
+      console.error("Error searching users:", error);
+      res.status(500).json({ error: "Failed to search users" });
+    }
+  });
+
+  // Get user's connections
+  app.get("/api/users/connections", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const connections = await db.query.userConnections.findMany({
+        where: (userConnections) =>
+          eq(userConnections.userId, req.user?.id as number) ||
+          eq(userConnections.connectedUserId, req.user?.id as number),
+        with: {
+          user: true,
+          connectedUser: true,
+        },
+      });
+
+      // Organize connections by status and transform data
+      const pending = connections
+        .filter(conn => conn.status === 'pending')
+        .map(conn => ({
+          ...conn,
+          user: conn.connectedUserId === req.user?.id ? conn.user : conn.connectedUser,
+        }));
+
+      const accepted = connections
+        .filter(conn => conn.status === 'accepted')
+        .map(conn => ({
+          ...conn,
+          user: conn.connectedUserId === req.user?.id ? conn.user : conn.connectedUser,
+        }));
+
+      res.json({ pending, accepted });
+    } catch (error) {
+      console.error("Error fetching connections:", error);
+      res.status(500).json({ error: "Failed to fetch connections" });
+    }
+  });
+
+  // Create connection request
+  app.post("/api/users/connections", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const { userId } = req.body;
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+
+      // Check if connection already exists
+      const existingConnection = await db.query.userConnections.findFirst({
+        where: or(
+          and(
+            eq(userConnections.userId, req.user.id),
+            eq(userConnections.connectedUserId, userId)
+          ),
+          and(
+            eq(userConnections.userId, userId),
+            eq(userConnections.connectedUserId, req.user.id)
+          )
+        ),
+      });
+
+      if (existingConnection) {
+        return res.status(400).json({ error: "Connection already exists" });
+      }
+
+      // Create new connection
+      const [connection] = await db.insert(userConnections)
+        .values({
+          userId: req.user.id,
+          connectedUserId: userId,
+          status: 'pending',
+        })
+        .returning();
+
+      res.status(201).json(connection);
+    } catch (error) {
+      console.error("Error creating connection:", error);
+      res.status(500).json({ error: "Failed to create connection" });
+    }
+  });
+
+  // Update connection status (accept/reject)
+  app.patch("/api/users/connections/:id", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      if (!['accepted', 'rejected'].includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+
+      // Find the connection and verify ownership
+      const [existingConnection] = await db.query.userConnections.findMany({
+        where: and(
+          eq(userConnections.id, parseInt(id)),
+          eq(userConnections.connectedUserId, req.user.id)
+        ),
+      });
+
+      if (!existingConnection) {
+        return res.status(404).json({ error: "Connection not found" });
+      }
+
+      if (existingConnection.status !== 'pending') {
+        return res.status(400).json({ error: "Connection already processed" });
+      }
+
+      // Update connection status
+      const [updatedConnection] = await db.update(userConnections)
+        .set({ status, updatedAt: new Date() })
+        .where(eq(userConnections.id, parseInt(id)))
+        .returning();
+
+      res.json(updatedConnection);
+    } catch (error) {
+      console.error("Error updating connection:", error);
+      res.status(500).json({ error: "Failed to update connection" });
     }
   });
 
