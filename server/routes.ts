@@ -10,7 +10,7 @@ import { findFreeTimeSlots } from "@/lib/calendar-utils";
 import { generatePersonalizedSuggestions, analyzeActivityPatterns } from "./services/recommendation-engine";
 import { nanoid } from 'nanoid';
 import { WebSocket } from "ws";
-
+import { searchBusinesses, mapPreferencesToCategories } from "./services/yelp-service";
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -63,6 +63,8 @@ export function registerRoutes(app: Express): Server {
         where: eq(activitySuggestions.userId, req.user.id),
       });
 
+      let suggestions = [];
+
       // Generate personalized suggestions using ML
       const mlSuggestions = await generatePersonalizedSuggestions(req.user.id, {
         pastActivities: pastSuggestions,
@@ -72,48 +74,33 @@ export function registerRoutes(app: Express): Server {
         timeOfDay: new Date().getHours() < 12 ? 'morning' :
           new Date().getHours() < 17 ? 'afternoon' : 'evening'
       });
+      suggestions.push(...mlSuggestions);
 
-      // Get nearby places based on user preferences and free time
-      let placeSuggestions: any[] = [];
-      if (lat && lng && user?.preferences?.activityTypes) {
-        placeSuggestions = await searchNearbyPlaces(
-          {
-            latitude: Number(lat),
-            longitude: Number(lng),
-          },
-          1000,
-          user.preferences.activityTypes
-        );
+      // Get Yelp suggestions based on user preferences and location
+      if (lat && lng && user?.preferences) {
+        const yelpCategories = mapPreferencesToCategories(user.preferences);
+        const yelpSuggestions = await searchBusinesses({
+          latitude: Number(lat),
+          longitude: Number(lng),
+          categories: yelpCategories,
+          radius: 5000, // 5km radius
+          limit: 10
+        });
 
         // Filter suggestions based on available time slots
-        placeSuggestions = placeSuggestions.filter(suggestion =>
+        const filteredYelpSuggestions = yelpSuggestions.filter(suggestion =>
           freeSlots.some(slot => slot.duration >= suggestion.duration)
         );
+
+        suggestions.push(...filteredYelpSuggestions);
       }
 
-      // Combine ML suggestions with place suggestions
-      const allSuggestions = [
-        ...mlSuggestions,
-        ...placeSuggestions.map(place => ({
-          id: `place_${place.title}`,
-          userId: req.user.id,
-          title: place.title,
-          description: place.description,
-          duration: place.duration,
-          location: place.location,
-          type: place.type,
-          energyLevel: place.energyLevel,
-          weatherDependent: place.weatherDependent,
-          indoorActivity: place.indoorActivity,
-          accepted: false,
-        })),
-      ];
+      // Deduplicate and sort suggestions by relevance
+      const uniqueSuggestions = Array.from(new Map(
+        suggestions.map(item => [item.title, item])
+      ).values());
 
-      // Analyze activity patterns to improve future suggestions
-      const patterns = await analyzeActivityPatterns(req.user.id);
-      console.log('Activity patterns:', patterns);
-
-      res.json(allSuggestions);
+      res.json(uniqueSuggestions);
     } catch (error) {
       console.error("Error in /api/suggestions:", error);
       res.status(500).json({ error: "Failed to fetch suggestions" });
