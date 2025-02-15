@@ -11,7 +11,7 @@ export async function searchBusinesses(params: {
 }) {
   try {
     const { latitude, longitude, categories, radius = 5000, limit = 10 } = params;
-    
+
     const searchParams: any = {
       latitude,
       longitude,
@@ -41,7 +41,8 @@ export async function searchBusinesses(params: {
       url: business.url,
       phone: business.phone,
       reviews: business.review_count,
-      price: business.price
+      price: business.price,
+      source: 'yelp'
     }));
   } catch (error) {
     console.error('Error searching Yelp businesses:', error);
@@ -53,20 +54,38 @@ export async function searchBusinesses(params: {
 export function mapPreferencesToCategories(preferences: {
   interests?: string[];
   activityTypes?: string[];
+  dietaryRestrictions?: string[];
 }) {
   const categoryMap: Record<string, string[]> = {
-    sports: ['active', 'sports_clubs', 'gyms'],
+    // Activity types
+    sports: ['active', 'sports_clubs', 'gyms', 'fitness'],
+    outdoors: ['hiking', 'parks', 'beaches', 'climbing'],
+    relaxation: ['spas', 'massage', 'yoga', 'meditation'],
+    entertainment: ['theaters', 'cinema', 'musicvenues', 'bowling'],
+    learning: ['education', 'artclasses', 'cookingclasses'],
+    social: ['restaurants', 'bars', 'cafes', 'social_clubs'],
+
+    // Interests
     food: ['restaurants', 'food'],
-    culture: ['museums', 'art', 'theater'],
-    outdoors: ['hiking', 'parks', 'beaches'],
-    entertainment: ['entertainment', 'nightlife', 'movies'],
-    education: ['education', 'libraries', 'tutoring'],
-    shopping: ['shopping', 'fashion'],
-    wellness: ['health', 'yoga', 'meditation'],
+    art: ['galleries', 'museums', 'art'],
+    music: ['musicvenues', 'jazzandblues', 'karaoke'],
+    technology: ['virtualrealitycenters', 'arcades', 'gaming'],
+    nature: ['parks', 'gardens', 'hiking', 'lakes'],
+    culture: ['culturalcenter', 'artmuseums', 'theater'],
+    shopping: ['shopping', 'fashion', 'retail'],
+    wellness: ['health', 'yoga', 'meditation', 'fitness'],
+
+    // Map dietary restrictions to restaurant categories
+    vegetarian: ['vegetarian'],
+    vegan: ['vegan'],
+    glutenfree: ['gluten_free'],
+    kosher: ['kosher'],
+    halal: ['halal']
   };
 
   const categories = new Set<string>();
-  
+
+  // Map interests to categories
   if (preferences.interests) {
     preferences.interests.forEach(interest => {
       const mappedCategories = categoryMap[interest.toLowerCase()];
@@ -76,9 +95,20 @@ export function mapPreferencesToCategories(preferences: {
     });
   }
 
+  // Map activity types to categories
   if (preferences.activityTypes) {
     preferences.activityTypes.forEach(type => {
       const mappedCategories = categoryMap[type.toLowerCase()];
+      if (mappedCategories) {
+        mappedCategories.forEach(category => categories.add(category));
+      }
+    });
+  }
+
+  // Add dietary restrictions if looking for food
+  if (categories.has('restaurants') && preferences.dietaryRestrictions) {
+    preferences.dietaryRestrictions.forEach(restriction => {
+      const mappedCategories = categoryMap[restriction.toLowerCase()];
       if (mappedCategories) {
         mappedCategories.forEach(category => categories.add(category));
       }

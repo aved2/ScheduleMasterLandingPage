@@ -45,9 +45,22 @@ export function registerRoutes(app: Express): Server {
     }
     try {
       const { lat, lng } = req.query;
+
+      // Get user with preferences
       const user = await db.query.users.findFirst({
         where: eq(users.id, req.user.id),
       });
+
+      if (!user?.preferences) {
+        return res.json([{
+          title: "Complete Your Profile",
+          description: "Add your interests and preferences to get personalized activity suggestions",
+          type: "system_message",
+          duration: 10,
+          location: "Profile Settings",
+          source: "system"
+        }]);
+      }
 
       // Get user's events for today
       const today = new Date();
@@ -65,34 +78,58 @@ export function registerRoutes(app: Express): Server {
 
       let suggestions = [];
 
-      // Generate personalized suggestions using ML
-      const mlSuggestions = await generatePersonalizedSuggestions(req.user.id, {
-        pastActivities: pastSuggestions,
-        userPreferences: user?.preferences,
-        currentEvents: userEvents,
-        location: user?.location,
-        timeOfDay: new Date().getHours() < 12 ? 'morning' :
-          new Date().getHours() < 17 ? 'afternoon' : 'evening'
-      });
-      suggestions.push(...mlSuggestions);
-
       // Get Yelp suggestions based on user preferences and location
-      if (lat && lng && user?.preferences) {
+      if (lat && lng) {
+        console.log('Mapping preferences:', user.preferences);
         const yelpCategories = mapPreferencesToCategories(user.preferences);
-        const yelpSuggestions = await searchBusinesses({
-          latitude: Number(lat),
-          longitude: Number(lng),
-          categories: yelpCategories,
-          radius: 5000, // 5km radius
-          limit: 10
+        console.log('Mapped Yelp categories:', yelpCategories);
+
+        if (yelpCategories.length > 0) {
+          const yelpSuggestions = await searchBusinesses({
+            latitude: Number(lat),
+            longitude: Number(lng),
+            categories: yelpCategories,
+            radius: 5000, // 5km radius
+            limit: 15
+          });
+
+          console.log(`Found ${yelpSuggestions.length} Yelp suggestions`);
+
+          // Filter suggestions based on available time slots
+          const filteredYelpSuggestions = yelpSuggestions.filter(suggestion =>
+            freeSlots.some(slot => slot.duration >= suggestion.duration)
+          );
+
+          suggestions.push(...filteredYelpSuggestions);
+        }
+      } else {
+        suggestions.push({
+          title: "Enable Location",
+          description: "Enable location services to get nearby activity suggestions",
+          type: "system_message",
+          duration: 5,
+          location: "Browser Settings",
+          source: "system"
+        });
+      }
+
+      try {
+        // Generate personalized suggestions using ML
+        const mlSuggestions = await generatePersonalizedSuggestions(req.user.id, {
+          pastActivities: pastSuggestions,
+          userPreferences: user.preferences,
+          currentEvents: userEvents,
+          location: user.location,
+          timeOfDay: new Date().getHours() < 12 ? 'morning' :
+            new Date().getHours() < 17 ? 'afternoon' : 'evening'
         });
 
-        // Filter suggestions based on available time slots
-        const filteredYelpSuggestions = yelpSuggestions.filter(suggestion =>
-          freeSlots.some(slot => slot.duration >= suggestion.duration)
-        );
-
-        suggestions.push(...filteredYelpSuggestions);
+        if (mlSuggestions?.length) {
+          suggestions.push(...mlSuggestions);
+        }
+      } catch (error) {
+        console.error('AI suggestion generation failed:', error);
+        // Continue without ML suggestions
       }
 
       // Deduplicate and sort suggestions by relevance
