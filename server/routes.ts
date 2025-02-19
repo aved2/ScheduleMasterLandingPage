@@ -7,10 +7,10 @@ import { OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
 import { searchNearbyPlaces } from "./services/place-suggestions";
 import { findFreeTimeSlots } from "@/lib/calendar-utils";
-import { generatePersonalizedSuggestions, analyzeActivityPatterns } from "./services/recommendation-engine";
+//import { generatePersonalizedSuggestions, analyzeActivityPatterns } from "./services/recommendation-engine";
 import { nanoid } from 'nanoid';
 import { WebSocket } from "ws";
-import { searchBusinesses, mapPreferencesToCategories } from "./services/yelp-service";
+//import { searchBusinesses, mapPreferencesToCategories } from "./services/yelp-service";
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -21,6 +21,9 @@ const oauth2Client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
 export function registerRoutes(app: Express): Server {
   const httpServer = createServer(app);
 
+  // Reccomendation and Location features below are commented out as they are not implemented in the app yet
+
+  /*
   // Get user's events
   app.get("/api/events", async (req, res) => {
     if (!req.user) {
@@ -683,6 +686,6 @@ export function registerRoutes(app: Express): Server {
       res.status(500).json({ error: "Failed to update connection" });
     }
   });
-
+  */
   return httpServer;
 }

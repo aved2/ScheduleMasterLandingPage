@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Calendar, AlertCircle } from "lucide-react";
+import { Calendar, AlertCircle, Check } from "lucide-react";
 import { useState } from "react";
 import { SiGoogle, SiApple, SiZoom, SiGooglecalendar } from "react-icons/si";
 import { BiLogoMicrosoft } from "react-icons/bi";
@@ -96,7 +96,7 @@ export default function Calendars() {
                   <ul className="space-y-2">
                     {platform.features.map((feature) => (
                       <li key={feature} className="flex items-center gap-2">
-                        <AlertCircle className="h-4 w-4 text-primary" />
+                        <Check className="h-4 w-4 text-primary" />
                         <span className="text-sm">{feature}</span>
                       </li>
                     ))}
@@ -126,7 +126,7 @@ export default function Calendars() {
                   <ul className="space-y-2">
                     {platform.features.map((feature) => (
                       <li key={feature} className="flex items-center gap-2">
-                        <AlertCircle className="h-4 w-4 text-primary" />
+                        <Check className="h-4 w-4 text-primary" />
                         <span className="text-sm">{feature}</span>
                       </li>
                     ))}
@@ -167,7 +167,7 @@ export default function Calendars() {
                       <li>Update event details</li>
                     </ul>
                     <p className="flex items-center gap-2 text-yellow-600">
-                      <AlertCircle className="h-4 w-4" />
+                      <Check className="h-4 w-4" />
                       Your calendar data will never be shared without your permission
                     </p>
                     <Button onClick={handleGoogleAuth} className="w-full">
@@ -199,7 +199,7 @@ export default function Calendars() {
                       <li>Update event details</li>
                     </ul>
                     <p className="flex items-center gap-2 text-yellow-600">
-                      <AlertCircle className="h-4 w-4" />
+                      <Check className="h-4 w-4" />
                       Your calendar data will never be shared without your permission
                     </p>
                     <Button onClick={handleOutlookAuth} className="w-full">
@@ -231,7 +231,7 @@ export default function Calendars() {
                       <li>Update event details</li>
                     </ul>
                     <p className="flex items-center gap-2 text-yellow-600">
-                      <AlertCircle className="h-4 w-4" />
+                      <Check className="h-4 w-4" />
                       Your calendar data will never be shared without your permission
                     </p>
                     <Button onClick={handleAppleAuth} className="w-full">
