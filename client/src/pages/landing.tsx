@@ -138,16 +138,6 @@ export default function Landing() {
                     </Link>
                   </Button>
                 </div>
-                <div className="mt-8 flex items-center gap-4">
-                  <div className="flex -space-x-2">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="w-8 h-8 rounded-full bg-primary/10 border-2 border-background" />
-                    ))}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Join 10,000+ users optimizing their time
-                  </p>
-                </div>
               </div>
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/5 rounded-lg" />
@@ -299,12 +289,6 @@ export default function Landing() {
                 <Link href="/form">
                   <Calendar className="w-5 h-5" />
                   Get Early Access
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" className="gap-2" asChild>
-                <Link href="/getting-started">
-                  <Play className="w-5 h-5" />
-                  View Setup Guide
                 </Link>
               </Button>
             </div>

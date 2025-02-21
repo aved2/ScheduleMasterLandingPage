@@ -170,10 +170,6 @@ export default function Features() {
       </div>
 
       <div className="mt-16 text-center">
-        <Button size="lg" className="gap-2">
-          <Calendar className="w-5 h-5" />
-          Try These Features Now
-        </Button>
       </div>
     </div>
   );

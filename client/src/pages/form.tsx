@@ -2,20 +2,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useState } from "react";
+import * as z from "zod";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email"),
-  reason: z.string(),
+  email: z.string().email("Invalid email address"),
+  reason: z.string().min(1, "Reason is required"),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 export default function FormPage() {
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -27,32 +28,30 @@ export default function FormPage() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const response = await fetch(`https://api.airtable.com/v0/app9L2oMC0VaAvod5/tblKJzaH8jncCAEzT`, {
+      const formBody = new URLSearchParams(data as any).toString(); // Convert data to form-urlencoded
+  
+      const response = await fetch("https://script.google.com/macros/s/AKfycbx-ZXQpG1ZH_ci9SpRMBsgUOMTilkHI99UoQ7q6hkppCQ1W_MKlOflRM5eKwcMlDwYZfQ/exec", {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer patYgwPxmwCgdJZeK.b2263de1d1939a5c53a3b1eef7558cfd78c234be7a77c260c8fc9c831f313f5a`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          fields: {
-            Name: data.name,
-            Email: data.email,
-            Reason: data.reason,
-            Timestamp: new Date().toISOString()
-          } 
-        }),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }, // Plain text
+        body: formBody,
+        redirect: "follow",
       });
   
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
   
-      const result = await response.json();
+      const result = await response.text();
       console.log("Server Response:", result);
+      
+      // Reset the form fields
+      form.reset();
+      // Set the submission status to true
+      setIsSubmitted(true);
     } catch (error) {
-      console.error("Fetch Error:", error.message);
+      console.error("Fetch Error:", error);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen grid md:grid-cols-2">
@@ -89,14 +88,22 @@ export default function FormPage() {
                 <select id="reason" {...form.register("reason")} className="w-full p-2 border rounded">
                   <option value="">Select a reason</option>
                   <option value="option1">Personal Use</option>
-                  <option value="option2">Business/Oringinization</option>
+                  <option value="option2">Business/Organization</option>
                   <option value="option4">Other</option>
                 </select>
+                {form.formState.errors.reason && (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.reason.message}
+                  </p>
+                )}
               </div>
               <Button type="submit" className="w-full">
                 Submit
               </Button>
             </form>
+            {isSubmitted && (
+              <p className="text-green-500 mt-4">You've been placed on the waitlist!</p>
+            )}
           </CardContent>
         </Card>
       </div>
