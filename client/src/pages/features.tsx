@@ -1,5 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, CheckCircle, Clock, MapPin, Brain, Users, Sparkles, ArrowRight } from "lucide-react";
+import { 
+  Calendar, Brain, Cloud, Users, Sparkles, 
+  ArrowRight, Sun, Clock, Share2, BarChart
+} from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Features() {
@@ -7,69 +10,103 @@ export default function Features() {
     {
       title: "AI-Powered Activity Suggestions",
       icon: <Brain className="w-8 h-8 text-primary" />,
-      description: "Our advanced AI analyzes your schedule, preferences, and past activities to suggest personalized activities that fit perfectly into your free time.",
+      description: "Our advanced AI engine learns from your preferences and schedule patterns to suggest the perfect activities.",
       benefits: [
-        "Personalized recommendations based on your interests",
-        "Activities that fit your available time slots",
-        "Suggestions adapt to your location and time of day",
-        "Learn from your feedback to improve future recommendations"
+        "Personalized recommendations based on past activities",
+        "Smart time-slot detection for optimal scheduling",
+        "Automatic adjustment to your daily routine",
+        "Learning from your feedback and preferences"
       ],
       howTo: [
-        "Set up your preferences in the settings",
         "Connect your calendars",
-        "Rate activities to improve suggestions",
-        "Accept or decline recommendations"
+        "Rate suggested activities",
+        "Set your preferences",
+        "Let AI optimize your schedule"
       ]
     },
     {
-      title: "Smart Calendar Integration",
-      icon: <Calendar className="w-8 h-8 text-primary" />,
-      description: "Seamlessly integrate with multiple calendar providers to get a comprehensive view of your schedule and find the perfect time for activities.",
+      title: "Weather-Aware Planning",
+      icon: <Cloud className="w-8 h-8 text-primary" />,
+      description: "Get activity suggestions that adapt to current and forecasted weather conditions.",
       benefits: [
-        "Support for Google, Outlook, and Apple calendars",
-        "Automatic free time detection",
-        "Real-time calendar synchronization",
-        "Smart conflict detection"
-      ],
-      howTo: [
-        "Go to Calendar Settings",
-        "Choose your calendar provider",
-        "Authorize access",
-        "Select calendars to sync"
-      ]
-    },
-    {
-      title: "Location-Aware Planning",
-      icon: <MapPin className="w-8 h-8 text-primary" />,
-      description: "Find activities and places near you that match your interests and available time slots.",
-      benefits: [
-        "Discover local activities and venues",
-        "Get travel time estimates",
-        "Weather-aware outdoor suggestions",
-        "Radius-based search customization"
+        "Real-time weather integration",
+        "Indoor/outdoor activity alternatives",
+        "Weather-based rescheduling suggestions",
+        "Seasonal activity recommendations"
       ],
       howTo: [
         "Enable location services",
-        "Set your preferred activity radius",
-        "Choose activity types you enjoy",
-        "Get local suggestions automatically"
+        "Set weather preferences",
+        "Choose activity types",
+        "Review weather-smart suggestions"
       ]
     },
     {
-      title: "Time Management Tools",
-      icon: <Clock className="w-8 h-8 text-primary" />,
-      description: "Advanced tools to help you make the most of your free time and maintain a healthy work-life balance.",
+      title: "Energy Level Matching",
+      icon: <Sun className="w-8 h-8 text-primary" />,
+      description: "Schedule activities that align with your natural energy patterns throughout the day.",
       benefits: [
-        "Visual time blocking",
-        "Automatic buffer time calculation",
-        "Duration-based activity matching",
-        "Priority-based scheduling"
+        "Personal energy profile creation",
+        "Activity intensity matching",
+        "Productivity optimization",
+        "Balanced daily schedule"
       ],
       howTo: [
-        "Review your daily timeline",
-        "Set preferred activity durations",
-        "Define buffer times between events",
-        "Use quick-add shortcuts for common activities"
+        "Track your energy patterns",
+        "Rate activity intensity",
+        "Set peak productivity hours",
+        "Get energy-optimized suggestions"
+      ]
+    },
+    {
+      title: "Social Planning & Sharing",
+      icon: <Users className="w-8 h-8 text-primary" />,
+      description: "Effortlessly coordinate activities with friends and colleagues.",
+      benefits: [
+        "Group activity scheduling",
+        "Shared calendar coordination",
+        "Social preference matching",
+        "Collaborative event planning"
+      ],
+      howTo: [
+        "Connect with friends",
+        "Share your availability",
+        "Create group activities",
+        "Send invitations easily"
+      ]
+    },
+    {
+      title: "Work-Life Balance Tools",
+      icon: <Clock className="w-8 h-8 text-primary" />,
+      description: "Smart features to help you maintain a healthy balance between work and personal time.",
+      benefits: [
+        "Break time optimization",
+        "Focus session scheduling",
+        "Recovery period suggestions",
+        "Productivity analytics"
+      ],
+      howTo: [
+        "Set work hours",
+        "Define break preferences",
+        "Track productivity goals",
+        "Review balance insights"
+      ]
+    },
+    {
+      title: "Activity Analytics",
+      icon: <BarChart className="w-8 h-8 text-primary" />,
+      description: "Gain insights into your time usage and activity patterns.",
+      benefits: [
+        "Time allocation analysis",
+        "Activity impact tracking",
+        "Progress visualization",
+        "Habit formation metrics"
+      ],
+      howTo: [
+        "Enable activity tracking",
+        "Set tracking goals",
+        "Review weekly insights",
+        "Optimize your routine"
       ]
     }
   ];
@@ -77,13 +114,13 @@ export default function Features() {
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="max-w-3xl mx-auto text-center mb-16">
-        <h1 className="text-4xl font-bold mb-6">Powerful Features to Enhance Your Day</h1>
+        <h1 className="text-4xl font-bold mb-6">Powerful Features to Transform Your Time</h1>
         <p className="text-xl text-muted-foreground">
-          Discover how GoLucky makes activity planning effortless and enjoyable with our smart features
+          Discover how GoLucky uses advanced technology to help you make the most of every moment
         </p>
       </div>
 
-      <div className="grid gap-12">
+      <div className="grid gap-8">
         {features.map((feature, index) => (
           <Card key={feature.title} className="overflow-hidden">
             <CardHeader className="space-y-4">
@@ -106,7 +143,7 @@ export default function Features() {
                   <ul className="space-y-3">
                     {feature.benefits.map((benefit) => (
                       <li key={benefit} className="flex items-start gap-2">
-                        <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                        <ArrowRight className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                         <span>{benefit}</span>
                       </li>
                     ))}
@@ -115,7 +152,7 @@ export default function Features() {
 
                 <div>
                   <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                    <ArrowRight className="w-5 h-5 text-primary" />
+                    <Share2 className="w-5 h-5 text-primary" />
                     How to Use
                   </h3>
                   <ol className="space-y-3 list-decimal list-inside">
@@ -135,7 +172,7 @@ export default function Features() {
       <div className="mt-16 text-center">
         <Button size="lg" className="gap-2">
           <Calendar className="w-5 h-5" />
-          Try It Now
+          Try These Features Now
         </Button>
       </div>
     </div>

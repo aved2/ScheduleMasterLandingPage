@@ -1,258 +1,314 @@
 import { Button } from "@/components/ui/button";
-import { Calendar } from "lucide-react";
-import { SiZoom, SiGooglecalendar, SiGoogle, SiZapier } from "react-icons/si";
+import { Calendar, Play, ArrowRight, Sun, Cloud, Brain, Users, Sparkles, BarChart2, Quote } from "lucide-react";
+import { SiZoom, SiGooglecalendar, SiGoogle } from "react-icons/si";
 import { BiLogoMicrosoft } from "react-icons/bi";
 import { Link } from "wouter";
+import { Avatar } from "@/components/ui/avatar";
 
 export default function Landing() {
-  const testimonials = [
+  const userTypes = [
     {
-      text: "The app suggested a museum visit between my meetings - it was the perfect creative break I needed!",
-      author: "Sarah J., Product Manager"
+      title: "Professionals",
+      description: "Optimize your work-life balance with smart scheduling",
+      icon: "👔",
+      benefits: ["Automated break scheduling", "Meeting optimization", "Work-life balance tips"]
     },
     {
-      text: "I love how it finds nearby parks for my running sessions based on my schedule gaps.",
-      author: "Mike R., Entrepreneur"
+      title: "Students",
+      description: "Balance study sessions with social activities",
+      icon: "🎓",
+      benefits: ["Study break reminders", "Social event planning", "Exam preparation time"]
     },
     {
-      text: "It helped me discover local cafes for my work breaks. The location-aware suggestions are incredible!",
-      author: "Emma L., Designer"
+      title: "Remote Workers",
+      description: "Enhance your home-based work routine",
+      icon: "🏠",
+      benefits: ["Virtual meeting management", "Break time activities", "Productivity tracking"]
     },
     {
-      text: "The AI perfectly balances my work meetings with leisure activities. It's like having a personal assistant.",
-      author: "David K., Software Engineer"
-    },
-  ];
-
-  const businessBenefits = [
-    {
-      title: "Smart Team Coordination",
-      description: "AI-powered scheduling that considers everyone's preferences and availability",
-      icon: "👥"
-    },
-    {
-      title: "Client Relationship Management",
-      description: "Track meetings, follow-ups, and engagement history seamlessly",
-      icon: "🤝"
-    },
-    {
-      title: "Data-Driven Insights",
-      description: "Understand team productivity and meeting effectiveness",
-      icon: "📊"
-    },
-    {
-      title: "Resource Optimization",
-      description: "Make the most of your team's time and meeting spaces",
-      icon: "⚡"
+      title: "Fitness Enthusiasts",
+      description: "Never miss a workout with smart scheduling",
+      icon: "💪",
+      benefits: ["Weather-based workout plans", "Exercise time optimization", "Activity tracking"]
     }
   ];
 
-  const sampleEvents = [
+  const features = [
     {
-      title: "Morning Yoga",
-      time: "7:00 AM",
-      image: "🧘‍♀️",
-      type: "wellness"
+      title: "AI-Powered Scheduling",
+      description: "Our smart AI learns your preferences and fills your free time with meaningful activities",
+      icon: <Brain className="w-12 h-12" />,
+      color: "bg-blue-100 dark:bg-blue-950",
+      link: "/features#ai-scheduling"
     },
     {
-      title: "Team Standup",
-      time: "9:30 AM",
-      image: "👥",
-      type: "work"
+      title: "Weather-Aware",
+      description: "Get activity suggestions that adapt to current weather conditions",
+      icon: <Cloud className="w-12 h-12" />,
+      color: "bg-yellow-100 dark:bg-yellow-950",
+      link: "/features#weather"
     },
     {
-      title: "Local Art Gallery",
-      time: "12:00 PM",
-      image: "🎨",
-      type: "leisure"
+      title: "Energy Matching",
+      description: "Activities that align perfectly with your daily energy levels",
+      icon: <Sun className="w-12 h-12" />,
+      color: "bg-purple-100 dark:bg-purple-950",
+      link: "/features#energy"
     },
     {
-      title: "Park Run",
-      time: "5:30 PM",
-      image: "🏃‍♂️",
-      type: "exercise"
+      title: "Social Planning",
+      description: "Effortlessly coordinate activities with friends and colleagues",
+      icon: <Users className="w-12 h-12" />,
+      color: "bg-green-100 dark:bg-green-950",
+      link: "/features#social"
+    }
+  ];
+
+  const testimonials = [
+    {
+      title: "Work-Life Balance Transformation",
+      subtitle: "How GoLucky helped a busy executive",
+      author: "Sarah Chen",
+      role: "Chief Technology Officer",
+      quote: "GoLucky transformed how I manage my time. The AI-powered suggestions helped me find the perfect balance between work commitments and personal time.",
+      impact: [
+        "Reduced scheduling conflicts by 60%",
+        "Found time for regular exercise",
+        "Improved work-life satisfaction"
+      ],
+      avatar: "SC"
+    },
+    {
+      title: "Staying Organized as a Freelancer",
+      author: "Marcus Rodriguez",
+      role: "Independent Designer",
+      quote: "As a freelancer juggling multiple clients, GoLucky has become my personal assistant. It intelligently schedules my work and ensures I never miss important deadlines.",
+      impact: [
+        "Increased productivity by 40%",
+        "Better client satisfaction",
+        "More time for skill development"
+      ],
+      avatar: "MR"
+    },
+    {
+      title: "Maximizing Student Productivity",
+      author: "Emily Watson",
+      role: "Graduate Student",
+      quote: "GoLucky helped me balance my academic commitments with extracurricular activities. The energy-based scheduling is a game-changer for study sessions.",
+      impact: [
+        "Improved study-life balance",
+        "Better grades through optimized study times",
+        "Reduced stress levels"
+      ],
+      avatar: "EW"
     }
   ];
 
   return (
     <div className="min-h-screen">
-      <main className="container mx-auto px-4 py-16">
+      <main>
         {/* Hero Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Transform Your Business Calendar into a Growth Engine
-          </h1>
-          <p className="text-xl text-muted-foreground mb-8">
-            World's First AI-Powered Business Calendar Platform That Combines Smart Scheduling, 
-            Team Coordination, and Client Relationship Management
+        <div className="relative overflow-hidden bg-background">
+          <div className="absolute inset-0 bg-grid-primary/5 [mask-image:linear-gradient(0deg,transparent,black)]" />
+          <div className="container mx-auto px-4 py-24">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="relative z-10">
+                <div className="inline-block mb-4 px-4 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
+                  Introducing Smart Time Management
+                </div>
+                <h1 className="text-5xl font-bold mb-6 leading-tight">
+                  Transform Free Time into 
+                  <span className="text-primary"> Meaningful Experiences</span>
+                </h1>
+                <p className="text-xl text-muted-foreground mb-8">
+                  Our AI-powered calendar understands your schedule, preferences, and energy levels
+                  to suggest perfect activities for your free time.
+                </p>
+                <div className="flex gap-4">
+                  <Button size="lg" className="gap-2" asChild>
+                    <Link href="/form">
+                      <Calendar className="w-5 h-5" />
+                      Get Early Access
+                    </Link>
+                  </Button>
+                  <Button size="lg" variant="outline" className="gap-2" asChild>
+                    <Link href="/features">
+                      <Play className="w-5 h-5" />
+                      See How It Works
+                    </Link>
+                  </Button>
+                </div>
+                <div className="mt-8 flex items-center gap-4">
+                  <div className="flex -space-x-2">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="w-8 h-8 rounded-full bg-primary/10 border-2 border-background" />
+                    ))}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Join 10,000+ users optimizing their time
+                  </p>
+                </div>
+              </div>
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/5 rounded-lg" />
+                <div className="relative bg-card rounded-lg p-6 shadow-xl">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4 bg-primary/5 p-4 rounded-lg">
+                      <Sparkles className="w-8 h-8 text-primary" />
+                      <div>
+                        <h3 className="font-medium">Smart Suggestions</h3>
+                        <p className="text-sm text-muted-foreground">AI analyzing your perfect time slots</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 bg-primary/5 p-4 rounded-lg">
+                      <BarChart2 className="w-8 h-8 text-primary" />
+                      <div>
+                        <h3 className="font-medium">Energy Tracking</h3>
+                        <p className="text-sm text-muted-foreground">Matching activities to your energy</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 bg-primary/5 p-4 rounded-lg">
+                      <Cloud className="w-8 h-8 text-primary" />
+                      <div>
+                        <h3 className="font-medium">Weather-Aware</h3>
+                        <p className="text-sm text-muted-foreground">Smart outdoor activity planning</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Features Grid */}
+        <div className="container mx-auto px-4 py-24">
+          <h2 className="text-3xl font-bold text-center mb-4">Powerful Features for Everyone</h2>
+          <p className="text-xl text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
+            Experience the perfect blend of AI intelligence and intuitive design to make every moment count
           </p>
-          <div className="flex gap-4 justify-center">
-            <Button size="lg" className="gap-2" asChild>
-              <Link href="/auth">
-                <Calendar className="h-5 w-5" />
-                Get Started Free
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature) => (
+              <Link key={feature.title} href={feature.link}>
+                <div className="group relative cursor-pointer">
+                  <div className={`${feature.color} rounded-lg p-6 transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg`}>
+                    <div className="text-primary mb-4">
+                      {feature.icon}
+                    </div>
+                    <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
+                    <p className="text-muted-foreground">{feature.description}</p>
+                  </div>
+                </div>
               </Link>
-            </Button>
-          </div>
-        </div>
-
-        {/* Business Benefits Section */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8">Revolutionize Your Business Operations</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {businessBenefits.map((benefit) => (
-              <div key={benefit.title} className="p-6 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                <div className="text-4xl mb-4">{benefit.icon}</div>
-                <h3 className="font-semibold text-lg mb-2">{benefit.title}</h3>
-                <p className="text-muted-foreground">{benefit.description}</p>
-              </div>
             ))}
           </div>
         </div>
 
-        {/* Calendar Preview Section */}
-        <div className="mb-16 bg-muted rounded-lg p-8">
-          <h2 className="text-3xl font-bold mb-6 text-center">Your Day, Enhanced</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {sampleEvents.map((event) => (
-              <div
-                key={event.title}
-                className="bg-background rounded-lg p-6 shadow-sm transition-transform hover:scale-105"
-              >
-                <div className="text-4xl mb-4">{event.image}</div>
-                <h3 className="font-semibold mb-2">{event.title}</h3>
-                <p className="text-muted-foreground">{event.time}</p>
-                <span className="inline-block mt-2 text-sm px-2 py-1 bg-primary/10 rounded-full">
-                  {event.type}
-                </span>
-              </div>
-            ))}
+        {/* Use Cases */}
+        <div className="bg-muted py-24">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-4">Who Can Benefit?</h2>
+            <p className="text-xl text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
+              Designed for everyone who wants to make the most of their time
+            </p>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {userTypes.map((type) => (
+                <div key={type.title} className="bg-card rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="text-4xl mb-4">{type.icon}</div>
+                  <h3 className="font-semibold text-lg mb-2">{type.title}</h3>
+                  <p className="text-muted-foreground mb-4">{type.description}</p>
+                  <ul className="space-y-2">
+                    {type.benefits.map((benefit) => (
+                      <li key={benefit} className="flex items-center gap-2 text-sm">
+                        <ArrowRight className="w-4 h-4 text-primary" />
+                        {benefit}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Testimonials */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold mb-6 text-center">What Business Leaders Say</h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            {testimonials.map((testimonial) => (
-              <div
-                key={testimonial.author}
-                className="bg-muted p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-              >
-                <p className="mb-4 text-lg italic">{testimonial.text}</p>
-                <p className="font-semibold text-primary">{testimonial.author}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Integrations Section */}
-        <div className="mb-16 text-center">
-          <h2 className="text-2xl font-semibold mb-8">Enterprise-Ready Integrations</h2>
-
-          {/* Platform integrations */}
-          <div className="mb-8">
-            <p className="text-muted-foreground mb-4">Seamlessly connects with your existing tools</p>
-            <div className="flex justify-center items-center gap-8 mb-8">
-              <SiZapier className="w-12 h-12 text-primary" title="Zapier" />
-              <SiZoom className="w-12 h-12 text-primary" title="Zoom" />
-              <SiGoogle className="w-12 h-12 text-primary" title="Google Meet" />
-              <SiGoogle className="w-12 h-12 text-primary" title="Gmail" />
-              <BiLogoMicrosoft className="w-12 h-12 text-primary" title="Outlook" />
-            </div>
-          </div>
-
-          {/* Calendar connections */}
-          <div>
-            <p className="text-muted-foreground mb-4">Unified calendar management across platforms</p>
-            <div className="flex justify-center items-center gap-8">
-              <SiGooglecalendar className="w-12 h-12 text-primary" title="Google Calendar" />
-              <BiLogoMicrosoft className="w-12 h-12 text-primary" title="Outlook Calendar" />
-              <SiGoogle className="w-12 h-12 text-primary" title="Apple Calendar" />
-            </div>
-          </div>
-        </div>
-
-        {/* New AI Assistant Section */}
-        <div className="mb-16 text-center">
-          <h2 className="text-2xl font-semibold mb-4">Your AI Business Assistant</h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            Intelligent scheduling, meeting optimization, and business insights - all powered by advanced AI
-          </p>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Siri-like interface mockup */}
-            <div className="relative">
-              <div className="bg-black rounded-[40px] p-6 aspect-[9/19] shadow-xl">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-7 bg-black rounded-b-3xl" />
-                <div className="h-full bg-background rounded-[28px] p-4 flex flex-col">
-                  <div className="text-sm font-medium mb-2">Business Assistant</div>
-                  <div className="bg-muted rounded-lg p-4 mb-4">
-                    <p className="text-sm">"I noticed a gap in your schedule. Would you like me to suggest some potential client meetings or team activities?"</p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    <Button variant="outline" className="w-full">Client Meeting</Button>
-                    <Button variant="outline" className="w-full">Team Activity</Button>
-                    <Button variant="outline" className="w-full">Analytics</Button>
-                    <Button variant="outline" className="w-full">Schedule</Button>
-                  </div>
-                  <div className="mt-auto flex justify-center">
-                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                      <div className="w-12 h-12 rounded-full bg-primary animate-pulse" />
+        <div className="bg-background py-24">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-4">Success Stories</h2>
+            <p className="text-xl text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
+              Discover how GoLucky is helping professionals, freelancers, and students transform their time management
+            </p>
+            <div className="grid gap-8 md:grid-cols-3">
+              {testimonials.map((testimonial) => (
+                <div key={testimonial.title} className="relative bg-card rounded-lg p-6 shadow-lg">
+                  <div className="flex items-center gap-4 mb-6">
+                    <Avatar className="h-12 w-12">
+                      <div className="w-full h-full rounded-full bg-primary/10 flex items-center justify-center text-lg font-semibold">
+                        {testimonial.avatar}
+                      </div>
+                    </Avatar>
+                    <div>
+                      <h3 className="font-semibold">{testimonial.author}</h3>
+                      <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                    </div>
+                    <div className="absolute top-4 right-4 text-primary/10">
+                      <Quote className="w-12 h-12" />
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Email interface mockup */}
-            <div className="relative">
-              <div className="bg-card rounded-lg shadow-lg p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-full bg-primary" />
+                  <blockquote className="text-muted-foreground mb-6 italic">
+                    "{testimonial.quote}"
+                  </blockquote>
                   <div>
-                    <div className="font-medium">GoLucky Business Assistant</div>
-                    <div className="text-sm text-muted-foreground">assistant@golucky.ai</div>
+                    <h4 className="font-semibold mb-2">Key Improvements:</h4>
+                    <ul className="space-y-2">
+                      {testimonial.impact.map((item, index) => (
+                        <li key={index} className="flex items-center gap-2 text-sm">
+                          <ArrowRight className="w-4 h-4 text-primary" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
-                <div className="space-y-4">
-                  <p className="text-sm">Here's your business optimization report:</p>
-                  <div className="space-y-2">
-                    <div className="p-2 bg-muted rounded">
-                      <p className="text-sm">• Client meetings scheduled this week: 8</p>
-                      <p className="text-sm">• Team productivity score: 92%</p>
-                      <p className="text-sm">• Suggested follow-ups: 3</p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button variant="outline" size="sm" className="w-full">View Details</Button>
-                      <Button variant="outline" size="sm" className="w-full">Take Action</Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-8 flex justify-center">
-            <div className="bg-primary/10 rounded-lg p-4 max-w-lg">
-              <p className="text-sm">
-                Our AI understands your business context, optimizing schedules, suggesting strategic meetings,
-                and providing insights to drive growth and efficiency.
-              </p>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* CTA Section */}
-        <div className="text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Business?</h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            Join thousands of businesses using GoLucky to optimize their operations
-          </p>
-          <Button size="lg" className="gap-2">
-            <Calendar className="w-5 h-5" />
-            Start Free Trial
-          </Button>
+        {/* Integrations */}
+        <div className="container mx-auto px-4 py-24 text-center">
+          <h2 className="text-2xl font-semibold mb-4">Works With Your Favorite Tools</h2>
+          <p className="text-muted-foreground mb-8">Seamlessly integrate with the tools you already use</p>
+          <div className="flex justify-center items-center gap-8 flex-wrap">
+            <SiGooglecalendar className="w-12 h-12 text-primary opacity-75 hover:opacity-100 transition-opacity" title="Google Calendar" />
+            <BiLogoMicrosoft className="w-12 h-12 text-primary opacity-75 hover:opacity-100 transition-opacity" title="Microsoft Calendar" />
+            <SiZoom className="w-12 h-12 text-primary opacity-75 hover:opacity-100 transition-opacity" title="Zoom" />
+            <SiGoogle className="w-12 h-12 text-primary opacity-75 hover:opacity-100 transition-opacity" title="Google Meet" />
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="bg-primary/5 py-24">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Time?</h2>
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Join the waitlist for early access to our beta release
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="gap-2" asChild>
+                <Link href="/form">
+                  <Calendar className="w-5 h-5" />
+                  Get Early Access
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" className="gap-2" asChild>
+                <Link href="/getting-started">
+                  <Play className="w-5 h-5" />
+                  View Setup Guide
+                </Link>
+              </Button>
+            </div>
+          </div>
         </div>
       </main>
     </div>
