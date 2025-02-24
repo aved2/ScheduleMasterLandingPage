@@ -507,7 +507,7 @@ app.use((req, res, next) => {
   } else {
     serveStatic(app);
   }
-  const PORT = 5050;
+  const PORT = 5051;
   server.listen(PORT, "0.0.0.0", () => {
     log(`serving on port ${PORT}`);
   });
